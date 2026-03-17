@@ -90,27 +90,42 @@ export default function App() {
 
   const currentBlobs = moodColors[mood] || moodColors.serene;
 
-  return (
-    <div 
-      className="relative min-h-screen w-full bg-slate-50 transition-colors duration-700"
-      style={{ 
-        '--accent-color': state.themeColor || '#3B82F6',
-      } as React.CSSProperties}
-    >
-      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
-        
-        {/* 背景层 */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {currentBlobs.map((blob, i) => (
-            <div 
-              key={i} 
-              className={`absolute rounded-full blur-3xl opacity-20 transition-all duration-1000 ${
-                i === 0 ? "w-96 h-96 -top-20 -left-20" : i === 1 ? "w-80 h-80 top-1/2 -right-20" : "w-64 h-64 bottom-10 left-10"
-              }`} 
-              style={{ backgroundColor: 'var(--accent-color)' }} 
-            />
-          ))}
-        </div>
+ return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100">
+      <main className="flex-1 flex flex-col relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {state.activeTab === 'chat' && (
+            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">
+              <ChatTab state={state} onUpdateState={handleUpdateState} t={t} />
+            </motion.div>
+          )}
+          
+          {state.activeTab === 'archive' && (
+            <motion.div key="archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">
+              <ArchiveTab state={state} onUpdateState={handleUpdateState} t={t} />
+            </motion.div>
+          )}
+
+          {state.activeTab === 'profile' && (
+            <motion.div key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">
+              <ProfileTab 
+                state={state} 
+                onUpdateState={handleUpdateState} 
+                Modal={Modal} 
+                t={t} 
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      <BottomNav 
+        activeTab={state.activeTab} 
+        setActiveTab={(tab) => handleUpdateState({ activeTab: tab })} 
+        t={t}
+      />
+    </div>
+  );
 
         {/* 内容区域：使用 AnimatePresence 实现切换动画 */}
         <main className="flex-1 overflow-y-auto relative z-10 pb-24">
