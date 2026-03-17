@@ -1235,45 +1235,67 @@ export const RelationshipsTab: React.FC<{ state: AppState }> = ({ state }) => {
   );
 };
 
-{/* --- 颜色选择模块开始 --- */}
-<div className="mt-8 px-4">
-  <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
-    {state.language === 'zh' ? '个性化色彩' : 'Theme Color'}
-  </h3>
-  
-  <div className="flex flex-wrap gap-4 p-4 bg-slate-50 rounded-[32px] justify-between shadow-inner">
-    {[
-      { label: 'Classic', value: '#3B82F6' },
-      { label: 'Mint', value: '#10B981' },
-      { label: 'Amber', value: '#F59E0B' },
-      { label: 'Rose', value: '#EF4444' },
-      { label: 'Violet', value: '#8B5CF6' },
-      { label: 'Sakura', value: '#EC4899' }
-    ].map((item) => (
-      <button
-        key={item.value}
-        // 关键点：这里必须调用 onUpdateState，数据才会传回 App.tsx
-        onClick={() => onUpdateState?.({ themeColor: item.value })}
-        className={`group relative w-10 h-10 rounded-full transition-all duration-500 ease-out ${
-          state.themeColor === item.value 
-            ? 'scale-125 shadow-lg' 
-            : 'hover:scale-110 opacity-70 hover:opacity-100'
-        }`}
-        style={{ backgroundColor: item.value }}
-      >
-        {/* 选中时的光圈效果 */}
-        {state.themeColor === item.value && (
-          <motion.div 
-            layoutId="activeColor"
-            className="absolute -inset-1.5 rounded-full border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.1)]"
-            style={{ borderColor: 'white' }}
-          />
-        )}
-      </button>
-    ))}
-  </div>
-</div>
-{/* --- 颜色选择模块结束 --- */}
+export const ProfileTab: React.FC<{ 
+  state: AppState, 
+  mood?: string, 
+  onMoodChange?: (mood: any) => void,
+  onUpdateState?: (updates: Partial<AppState>) => void
+}> = ({ state, mood, onMoodChange, onUpdateState }) => {
+  // 定义可选的主题色列表
+  const themeColors = [
+    { label: '默认蓝', value: '#3B82F6' },
+    { label: '薄荷绿', value: '#10B981' },
+    { label: '琥珀橙', value: '#F59E0B' },
+    { label: '胭脂红', value: '#EF4444' },
+    { label: '极光紫', value: '#8B5CF6' },
+    { label: '樱花粉', value: '#EC4899' }
+  ];
+
+  return (
+    <div className="p-6 space-y-8 pb-32">
+      {/* 个人信息头部 */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-2xl shadow-sm">👤</div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-800">Designer User</h2>
+          <p className="text-sm text-slate-400">Class of 2027</p>
+        </div>
+      </div>
+
+      {/* 核心修改：主题色彩选择区域 */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">主题色彩 / Theme Color</h3>
+        <div className="bg-slate-50/50 rounded-[32px] p-6 flex flex-wrap gap-5 justify-between shadow-inner">
+          {themeColors.map((color) => (
+            <button
+              key={color.value}
+              type="button"
+              // 关键：点击这里，数据会通过 onUpdateState 传回给 App.tsx
+              onClick={() => {
+                console.log("Setting theme color:", color.value);
+                onUpdateState?.({ themeColor: color.value });
+              }}
+              className={`relative w-10 h-10 rounded-full transition-all duration-500 ${
+                state.themeColor === color.value 
+                  ? 'scale-125 shadow-lg' 
+                  : 'hover:scale-110 opacity-60 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: color.value }}
+            >
+              {/* 选中时的外圈光晕 */}
+              {state.themeColor === color.value && (
+                <motion.div 
+                  layoutId="activeTheme"
+                  className="absolute -inset-2 rounded-full border-2 border-white shadow-sm"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
   
   // Local state for interactivity
   const [settingsState, setSettingsState] = useState({
