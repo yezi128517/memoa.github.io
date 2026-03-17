@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # 确保你的主分支叫 main
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # 删掉了 cache: 'npm' 这一行，不再强行找 lock 文件
       - name: Install dependencies
         run: npm install
       - name: Build
@@ -30,6 +30,14 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
+  
+  deploy:
+    needs: build # 确保在 build 完成后再运行
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
