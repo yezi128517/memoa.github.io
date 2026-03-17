@@ -2,59 +2,32 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 究极修复：补齐导航栏、AI助手、记忆库及个人中心的所有潜在图标
- * 彻底解决 Brain, Home, Sparkles 等 ReferenceError
+ * 核心修复：一次性导入所有可能用到的图标组件
+ * 彻底解决 ReferenceError: [IconName] is not defined
  */
 import { 
   // 基础导航
-  Home, 
-  House, 
-  Search, 
-  MessageSquare, 
-  Heart, 
-  User,
-  Settings,
+  Home, House, Search, MessageSquare, Heart, User, Users, Settings,
   
   // AI 与 智能功能
-  Sparkles, 
-  Brain,       // 核心修复：解决 Brain is not defined
-  Zap, 
-  Bot,
-  Cpu,
+  Sparkles, Brain, Zap, Bot, Cpu, Wand2,
   
   // 记忆与记录
-  Calendar, 
-  Clock, 
-  History,
-  MapPin, 
-  Plus,
-  MoreHorizontal,
-  Star,
+  Calendar, Clock, History, MapPin, Plus, MoreHorizontal, Star, 
+  Book, Bookmark, Image as ImageIcon,
   
   // 交互与多媒体
-  Send,
-  Mic,
-  Music,
-  Play,
-  Pause,
-  ChevronRight,
+  Send, Mic, Music, Play, Pause, ChevronRight, ChevronLeft,
   
   // 安全与系统
-  Shield,
-  Cloud,
-  Bell,
-  Lock,
-  LogOut,
-  Info,
-  Share2,
-  Trash2,
-  Edit3
+  Shield, Cloud, Bell, Lock, LogOut, Info, Share2, Trash2, Edit3, Check, X
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
+// 兼容你代码中可能使用的小写引用
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
