@@ -1236,47 +1236,32 @@ export const RelationshipsTab: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, Palette, User, SlidersHorizontal, 
   ShieldCheck, Bell, Database, ChevronRight, 
   Image as ImageIcon 
 } from 'lucide-react';
 
-// 假设这些是外部传入的辅助组件/函数
-// Modal, t (i18n), AppState 类型等
+// 定义接口以防止 "is not a function" 错误
+interface ProfileTabProps {
+  state: any;
+  mood?: string;
+  onMoodChange?: (mood: any) => void;
+  onUpdateState?: (updates: Partial<any>) => void;
+  t?: (key: string) => string;
+  Modal: any;
+}
 
-export const ProfileTab: React.FC<{ 
-  state: any, 
-  mood?: string, 
-  onMoodChange?: (mood: any) => void,
-  onUpdateState?: (updates: Partial<any>) => void,
-  t: (key: string) => string,
-  Modal: any // 这里的 Modal 应该是你项目中定义的弹窗组件
-}> = ({ state, mood, onMoodChange, onUpdateState, t, Modal }) => {
-  
-  // --- 状态管理 ---
+export const ProfileTab: React.FC<ProfileTabProps> = ({ 
+  state, mood, onMoodChange, onUpdateState, t = (s: string) => s, Modal 
+}) => {
+  // 1. 内部状态声明
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
   const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
   const [customColors, setCustomColors] = useState(['#f472b6', '#fef08a', '#22d3ee']);
-  const [isBackingUp, setIsBackingUp] = useState(false);
 
-  const [settingsState, setSettingsState] = useState({
-    faceId: true,
-    encryption: true,
-    stealth: false,
-    reminders: true,
-    insights: false,
-    milestones: true,
-    displayName: 'Memoa User',
-    email: 'yezi128517@gmail.com',
-    phone: '+86 138 **** 5678',
-    region: 'Shanghai, China',
-    language: state.language
-  });
-
-  // --- 核心配置 ---
   const themeColors = [
     { label: '默认蓝', value: '#3B82F6' },
     { label: '薄荷绿', value: '#10B981' },
@@ -1286,268 +1271,107 @@ export const ProfileTab: React.FC<{
     { label: '樱花粉', value: '#EC4899' }
   ];
 
-  // --- 处理函数 ---
-  const handleSettingClick = (key: string) => {
-    setActiveSetting(key);
-    setIsSettingsOpen(true);
-  };
-
-  const toggleSetting = (key: keyof typeof settingsState) => {
-    setSettingsState(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleCustomColorChange = (index: number, value: string) => {
-    const newColors = [...customColors];
-    newColors[index] = value;
-    setCustomColors(newColors);
-  };
-
-  const handleApplyCustomColors = () => {
-    onUpdateState?.({ 
-      customMoodColors: customColors.map(c => `bg-[${c}]/20`) 
-    });
-    onMoodChange?.('custom');
-    setIsCustomColorOpen(false);
-  };
-
-  const handleBackup = () => {
-    setIsBackingUp(true);
-    setTimeout(() => setIsBackingUp(false), 2000);
-  };
-
-  // --- 渲染子内容 ---
-  const getSettingContent = () => {
+  // 2. 渲染设置详情的辅助函数
+  const renderSettingDetail = () => {
     switch (activeSetting) {
       case 'profile':
         return (
           <div className="space-y-6">
             <div className="flex items-center gap-4 p-5 rounded-3xl bg-white/40 border border-white/40 shadow-sm">
-              <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden border-2 border-white relative group">
-                <img src="https://picsum.photos/seed/memoa-user/400/400" alt="avatar" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
-                  <ImageIcon size={16} className="text-white" />
-                </div>
+              <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden relative">
+                <img src="https://picsum.photos/seed/memoa-user/400/400" alt="avatar" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1">
-                <input 
-                  type="text" 
-                  value={settingsState.displayName} 
-                  onChange={(e) => setSettingsState(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="bg-transparent text-lg font-black text-slate-900 focus:outline-none w-full" 
-                />
-                <p className="text-xs text-slate-400">{t('Memory Architect')}</p>
+                <h4 className="text-lg font-black text-slate-900">Designer User</h4>
+                <p className="text-xs text-slate-400">Class of 2027</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">{t('Account Details')}</p>
-              <div className="sculpted-glass rounded-3xl overflow-hidden border border-white/40 bg-white/20">
-                {['Email', 'Phone'].map((field) => (
-                  <div key={field} className="p-4 flex flex-col gap-1 border-b border-white/20 last:border-none">
-                    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t(field)}</label>
-                    <input 
-                      type="text" 
-                      value={(settingsState as any)[field.toLowerCase()]} 
-                      onChange={(e) => setSettingsState(prev => ({ ...prev, [field.toLowerCase()]: e.target.value }))}
-                      className="bg-transparent text-sm font-bold text-slate-900 focus:outline-none" 
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button onClick={() => setIsSettingsOpen(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">{t('Save All Changes')}</button>
-          </div>
-        );
-      case 'privacy':
-        return (
-          <div className="space-y-6">
-            <div className="sculpted-glass rounded-3xl overflow-hidden border border-white/40 bg-white/20">
-              {[
-                { id: 'faceId', title: 'Face ID Lock', desc: 'Protect your memories with biometrics' },
-                { id: 'encryption', title: 'End-to-End Encryption', desc: 'Only you can access your data' },
-                { id: 'stealth', title: 'Stealth Mode', desc: 'Hide sensitive memories' }
-              ].map((item) => (
-                <div key={item.id} className="p-4 flex justify-between items-center border-b border-white/20 last:border-none">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-bold text-slate-900">{t(item.title)}</p>
-                    <p className="text-[10px] text-slate-400">{t(item.desc)}</p>
-                  </div>
-                  <button 
-                    onClick={() => toggleSetting(item.id as any)}
-                    className={`w-10 h-5 rounded-full relative transition-colors ${(settingsState as any)[item.id] ? 'bg-emerald-400' : 'bg-slate-200'}`}
-                  >
-                    <motion.div animate={{ x: (settingsState as any)[item.id] ? 22 : 4 }} className="absolute top-1 w-3 h-3 bg-white rounded-full" />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <button onClick={() => setIsSettingsOpen(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">
+              {t('Close')}
+            </button>
           </div>
         );
       case 'language':
         return (
-          <div className="space-y-6">
-            <div className="sculpted-glass rounded-3xl overflow-hidden border border-white/40 bg-white/20">
-              {['简体中文', 'English', '日本語', '한국어'].map((lang) => (
-                <button 
-                  key={lang}
-                  onClick={() => setSettingsState(prev => ({ ...prev, language: lang }))}
-                  className="w-full p-4 flex justify-between items-center border-b border-white/20 last:border-none hover:bg-white/20 transition-colors"
-                >
-                  <span className={`text-sm ${settingsState.language === lang ? 'font-black text-emerald-500' : 'font-bold text-slate-900'}`}>{lang}</span>
-                  {settingsState.language === lang && <div className="w-2 h-2 rounded-full bg-emerald-400" />}
-                </button>
-              ))}
-            </div>
-            <button 
-              onClick={() => {
-                onUpdateState?.({ language: settingsState.language });
-                setIsSettingsOpen(false);
-              }} 
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg"
-            >
-              {t('Save and Apply')}
-            </button>
+          <div className="space-y-4">
+            {['简体中文', 'English', '日本語'].map(lang => (
+              <button 
+                key={lang}
+                onClick={() => onUpdateState?.({ language: lang })}
+                className="w-full p-4 sculpted-glass rounded-2xl flex justify-between items-center"
+              >
+                <span className="font-bold">{lang}</span>
+                {state.language === lang && <div className="w-2 h-2 rounded-full bg-emerald-400" />}
+              </button>
+            ))}
           </div>
         );
       default:
-        return <p className="text-sm text-slate-500">{t('Settings content coming soon...')}</p>;
+        return <div className="py-10 text-center text-slate-400">{t('Coming Soon')}</div>;
     }
   };
 
-  // --- 主页面渲染 ---
+  // 3. 主界面返回
   return (
     <div className="p-8 space-y-12 flex flex-col items-center flex-1 pb-32">
-      {/* Header */}
+      {/* 头部信息 */}
       <header className="w-full relative text-center space-y-8 pt-6">
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 90 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsSettingsOpen(true)}
-          className="absolute top-0 right-0 p-4 text-slate-400 hover:text-slate-900 transition-colors"
-        >
-          <Settings size={24} strokeWidth={1.5} />
-        </motion.button>
-        
+        <button onClick={() => setIsSettingsOpen(true)} className="absolute top-0 right-0 p-4 text-slate-400">
+          <Settings size={24} />
+        </button>
         <div className="relative inline-block">
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -inset-8 rounded-full border border-dashed border-slate-400/20"
-          />
-          <div className="w-40 h-40 rounded-full sculpted-glass prism-refraction p-1.5 shadow-2xl border border-white/40 overflow-hidden">
-            <img 
-              src="https://picsum.photos/seed/memoa-user/400/400" 
-              className="w-full h-full rounded-full object-cover" 
-              alt="avatar" 
-            />
+          <div className="w-40 h-40 rounded-full sculpted-glass p-1.5 shadow-2xl border border-white/40 overflow-hidden">
+            <img src="https://picsum.photos/seed/memoa-user/400/400" className="w-full h-full object-cover" alt="avatar" />
           </div>
         </div>
-
-        <div className="space-y-1">
+        <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Designer User</h1>
           <p className="text-slate-400 text-[10px] font-bold tracking-[0.4em] uppercase">Class of 2027</p>
         </div>
       </header>
 
-      {/* 主题色彩选择 (Theme Color) */}
-      <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6 prism-refraction">
+      {/* 主题颜色选择区 */}
+      <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6">
         <div className="flex items-center gap-3">
-          <Palette size={18} className="text-slate-500" strokeWidth={1.5} />
+          <Palette size={18} className="text-slate-500" />
           <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">{t('Theme Color')}</h2>
         </div>
-        <div className="flex flex-wrap gap-5 justify-between px-2">
+        <div className="flex flex-wrap gap-5 justify-between">
           {themeColors.map((color) => (
             <button
               key={color.value}
               onClick={() => onUpdateState?.({ themeColor: color.value })}
-              className={`relative w-10 h-10 rounded-full transition-all duration-500 ${
-                state.themeColor === color.value ? 'scale-125 shadow-lg shadow-black/10' : 'hover:scale-110 opacity-60 hover:opacity-100'
-              }`}
+              className={`w-10 h-10 rounded-full transition-all ${state.themeColor === color.value ? 'scale-125 shadow-lg border-2 border-white' : 'opacity-60'}`}
               style={{ backgroundColor: color.value }}
-            >
-              {state.themeColor === color.value && (
-                <motion.div layoutId="activeTheme" className="absolute -inset-2 rounded-full border-2 border-white shadow-sm" />
-              )}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Atmosphere Mood Selector */}
-      <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6 prism-refraction">
-        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">{t('Atmosphere Mood')}</h2>
-        <div className="grid grid-cols-4 gap-4 w-full">
-          {[
-            { id: 'serene', color: 'bg-slate-500', label: 'Serene' },
-            { id: 'energetic', color: 'bg-yellow-400', label: 'Energetic' },
-            { id: 'warm', color: 'bg-orange-500', label: 'Warm' },
-            { id: 'mystic', color: 'bg-emerald-600', label: 'Mystic' },
-            { id: 'custom', color: 'bg-gradient-to-tr from-pink-400 via-yellow-200 to-cyan-400', label: 'Custom' },
-          ].map((m) => (
-            <motion.button 
-              key={m.id}
-              whileHover={{ scale: 1.1, y: -2 }}
-              onClick={() => m.id === 'custom' ? setIsCustomColorOpen(true) : onMoodChange?.(m.id)}
-              className={`aspect-square rounded-2xl ${m.color} shadow-lg border-2 ${mood === m.id ? 'border-emerald-400' : 'border-white/40'}`}
             />
           ))}
         </div>
       </section>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-2 gap-6 w-full">
-        <div className="sculpted-glass p-8 rounded-[32px] prism-refraction">
-          <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">{t('Streak')}</p>
-          <div className="flex items-end gap-1">
-            <span className="text-4xl font-black text-slate-900">12</span>
-            <span className="text-slate-400 text-[10px] mb-1.5 font-bold uppercase">{t('Days')}</span>
-          </div>
-        </div>
-        <div className="sculpted-glass p-8 rounded-[32px] prism-refraction">
-          <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.2em]">{t('Balance')}</p>
-          <div className="flex items-end gap-1">
-            <span className="text-4xl font-black text-slate-900">88</span>
-            <span className="text-slate-400 text-[10px] mb-1.5 font-bold uppercase">%</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Settings Menu List */}
+      {/* 底部菜单列表 */}
       <div className="w-full space-y-4">
         {[
           { key: 'profile', label: 'Profile Settings', icon: User },
           { key: 'language', label: 'Language Settings', icon: SlidersHorizontal },
           { key: 'privacy', label: 'Privacy & Security', icon: ShieldCheck },
-          { key: 'storage', label: 'Cloud Storage', icon: Database },
-        ].map((item, i) => (
-          <motion.button 
-            key={i}
-            whileHover={{ x: 8, backgroundColor: 'rgba(255,255,255,0.2)' }}
-            onClick={() => handleSettingClick(item.key)}
-            className="w-full sculpted-glass p-6 rounded-[28px] flex items-center justify-between text-slate-500 hover:text-slate-900 transition-all prism-refraction border border-white/20"
+        ].map((item) => (
+          <button 
+            key={item.key}
+            onClick={() => { setActiveSetting(item.key); setIsSettingsOpen(true); }}
+            className="w-full sculpted-glass p-6 rounded-[28px] flex items-center justify-between text-slate-500 hover:text-slate-900 transition-all border border-white/20"
           >
             <div className="flex items-center gap-5">
-              <item.icon size={22} strokeWidth={1.5} />
+              <item.icon size={22} />
               <span className="text-sm font-bold tracking-tight uppercase">{t(item.label)}</span>
             </div>
-            <ChevronRight size={22} className="text-slate-300" />
-          </motion.button>
+            <ChevronRight size={22} />
+          </button>
         ))}
       </div>
 
-      {/* Modals */}
+      {/* 弹窗组件 */}
       <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title={t('Settings')}>
-        {getSettingContent()}
-      </Modal>
-
-      <Modal isOpen={isCustomColorOpen} onClose={() => setIsCustomColorOpen(false)} title={t('Custom Atmosphere')}>
-        <div className="space-y-6">
-          <div className="flex justify-between gap-4">
-            {customColors.map((color, i) => (
-              <input key={i} type="color" value={color} onChange={(e) => handleCustomColorChange(i, e.target.value)} className="w-12 h-12 rounded-xl cursor-pointer" />
-            ))}
-          </div>
-          <button onClick={handleApplyCustomColors} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">{t('Apply Colors')}</button>
-        </div>
+        {renderSettingDetail()}
       </Modal>
     </div>
   );
