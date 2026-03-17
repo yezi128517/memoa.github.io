@@ -1280,12 +1280,12 @@ export const ProfileTab: React.FC<{
   };
 
 const handleApplyCustomColors = () => {
-  onUpdateState?.({ 
-    customMoodColors: customColors // 关键：这里直接传颜色数组，不要拼接字符串
-  });
-  onMoodChange?.('custom');
-  setIsCustomColorOpen(false);
-};
+    onUpdateState?.({ 
+      customMoodColors: customColors // 确保这里只传 customColors，不要有任何字符串拼接
+    });
+    onMoodChange?.('custom');
+    setIsCustomColorOpen(false);
+  };
 
   const handleSettingClick = (key: string) => {
     setActiveSetting(key);
