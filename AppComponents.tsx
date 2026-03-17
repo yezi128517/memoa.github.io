@@ -1,15 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Home, Brain, Sparkles, Users, User, 
-  Search, Heart, Plus, ChevronRight, 
-  Mic, Settings, SlidersHorizontal, Palette,
-  ShieldCheck, Bell, Database, Image as ImageIcon,
-  Volume2, X, MapPin, Clock
-} from 'lucide-react';
-import { GoogleGenAI, Modality } from "@google/genai";
-import { AppState, TabType, BottomNavProps, MusicApp, MemoryCard } from '../types';
-import { translations } from '../translations';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+// 核心修复：删掉 ../ 直接从当前目录导入
+import { TRANSLATIONS } from './translations'; 
+import { AppState, Memory } from './types';
+import { CATEGORIES } from './constants';
 
 // --- Shared Components ---
 
