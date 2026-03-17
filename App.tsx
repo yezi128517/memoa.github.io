@@ -9,7 +9,7 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-} from './AppComponents'; // 注意这里：因为在根目录，所以直接引用 ./AppComponents
+} from './AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
@@ -30,13 +30,6 @@ export default function App() {
     window.addEventListener('setTab', handleSetTab);
     return () => window.removeEventListener('setTab', handleSetTab);
   }, []);
-
-  // Simulate storage alert
-  useEffect(() => {
-    if (state.storageUsage >= 88) {
-      console.log("Memoa：存储占用已达 88%，建议进行断舍离，删除一些重复的照片。");
-    }
-  }, [state.storageUsage]);
 
   const renderTab = () => {
     switch (state.activeTab) {
@@ -83,25 +76,14 @@ export default function App() {
     custom: state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee'],
   };
 
-{currentBlobs.map((blob, i) => {
-  const isCustom = mood === 'custom';
-  // 关键：如果是自定义颜色，直接使用 blob 作为背景色
-  const style = isCustom ? { backgroundColor: blob, opacity: i === 0 ? 0.4 : 0.2 } : {};
-  const className = isCustom ? 
-    `aurora-blob transition-all duration-1000` : 
-    `aurora-blob transition-all duration-1000 ${blob}`;
-  
+  const currentBlobs = moodColors[mood] || moodColors.serene;
+
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-slate-50">
-      {/* Main Content Container - Mobile App Structure */}
-      <div 
-        className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col"
-      >
-        {/* Morning Mist Aurora Background - Now contained within the mobile app */}
+      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col">
         <div className="mist-aurora">
           {currentBlobs.map((blob, i) => {
             const isCustom = mood === 'custom';
-            // If custom, blob is a hex code. If standard, blob is a tailwind class.
             const style = isCustom ? { backgroundColor: blob, opacity: i === 0 ? 0.4 : 0.2 } : {};
             const className = isCustom ? 
               `aurora-blob transition-all duration-1000` : 
@@ -114,11 +96,7 @@ export default function App() {
             ];
 
             return (
-              <div 
-                key={i} 
-                className={`${className} ${sizes[i]}`} 
-                style={style}
-              />
+              <div key={i} className={`${className} ${sizes[i]}`} style={style} />
             );
           })}
         </div>
