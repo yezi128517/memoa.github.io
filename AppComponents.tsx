@@ -2,52 +2,59 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 核心修复：一站式补全所有导航栏及界面图标
- * 解决 Home, Sparkles, Heart 等未定义导致的白屏问题
+ * 究极修复：补齐导航栏、AI助手、记忆库及个人中心的所有潜在图标
+ * 彻底解决 Brain, Home, Sparkles 等 ReferenceError
  */
 import { 
-  // 底部导航栏常用
+  // 基础导航
   Home, 
-  House,         // 部分版本名为 House
+  House, 
   Search, 
   MessageSquare, 
   Heart, 
   User,
-  
-  // 功能按钮及状态
-  Plus,
-  Filter,
   Settings,
+  
+  // AI 与 智能功能
+  Sparkles, 
+  Brain,       // 核心修复：解决 Brain is not defined
+  Zap, 
+  Bot,
+  Cpu,
+  
+  // 记忆与记录
+  Calendar, 
+  Clock, 
+  History,
+  MapPin, 
+  Plus,
   MoreHorizontal,
+  Star,
+  
+  // 交互与多媒体
   Send,
   Mic,
   Music,
-  LogOut,
+  Play,
+  Pause,
   ChevronRight,
   
-  // 装饰与 AI 氛围
-  Sparkles,      // 解决 Sparkles is not defined
-  Zap,
-  Star,
-  
-  // 设置与个人中心
+  // 安全与系统
   Shield,
   Cloud,
   Bell,
   Lock,
-  Calendar,
-  MapPin,
-  Clock,
-  History,
+  LogOut,
   Info,
-  Share2
+  Share2,
+  Trash2,
+  Edit3
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
-// 确保兼容小写引用
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
