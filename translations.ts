@@ -1,4 +1,10 @@
-export const translations: Record<string, Record<string, string>> = {
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// 关键修复：将变量名从小写改为大写 TRANSLATIONS，以匹配 AppComponents 的导入
+export const TRANSLATIONS: Record<string, Record<string, string>> = {
   '简体中文': {
     'Home': '主页',
     'Memories': '记忆',
@@ -365,6 +371,5 @@ export const translations: Record<string, Record<string, string>> = {
     'Nostalgia': '향수',
     'Add': '추가',
     'Cancel': '취소',
-    'App Name...': '앱 이름...',
   }
 };
