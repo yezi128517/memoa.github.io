@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { INITIAL_STATE } from './constants';
@@ -14,7 +9,7 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-import { ... } from './src/components/AppComponents';
+} from './AppComponents'; // 注意这里：因为在根目录，所以直接引用 ./AppComponents
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
