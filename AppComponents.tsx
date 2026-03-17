@@ -2,38 +2,43 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 终极补齐：包含所有潜在的页面图标，防止任何切换崩溃
+ * 终极图标包：包含 AI 助手、音量、多媒体及所有导航图标
+ * 彻底解决 ReferenceError: Volume2 / Brain / Users 等报错
  */
 import { 
-  // 1. 基础导航 & 布局
+  // 1. 基础导航与布局
   Home, House, Search, MessageSquare, Heart, User, Users, Settings, 
   Menu, X, Plus, MoreHorizontal, MoreVertical, ChevronRight, ChevronLeft, 
-  ChevronDown, ChevronUp, Check,
+  ChevronDown, ChevronUp, Check, Layout, Grid, List,
 
-  // 2. 记忆 & 情感 (Memoa 核心)
-  Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
-  Image as ImageIcon, Camera, Film, Mic, Music, 
-  Smile, Frown, Meh, Sun, Moon,
-
-  // 3. AI & 科技感 (高级感必备)
-  Sparkles, Brain, Zap, Bot, Cpu, Wand2, 
-  Activity, Fingerprint, Eye, EyeOff,
-
-  // 4. 列表过滤 & 控制 (解决你目前的报错)
-  SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
+  // 2. AI 助手与智能感 (Memoa 核心)
+  Sparkles, Brain, Zap, Bot, Cpu, Wand2, Activity, Fingerprint, Eye, EyeOff,
   
-  // 5. 系统 & 功能
-  Send, Share2, Trash2, Edit3, Edit, 
+  // 3. 音频与多媒体 (解决 Volume2 报错)
+  Mic, Music, Play, Pause, Volume, Volume1, Volume2, VolumeX,
+  SkipForward, SkipBack, Repeat, Shuffle, Headphones,
+
+  // 4. 记忆、时间与地点
+  Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
+  Image as ImageIcon, Camera, Film,
+
+  // 5. 控制、过滤与列表
+  SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
+  Send, Share2, Trash2, Edit3, Edit, Write, RefreshCw,
+
+  // 6. 系统、安全与状态
   Shield, ShieldCheck, Lock, Unlock, Key,
   Cloud, CloudUpload, Bell, BellDot, LogOut, Info,
-  Play, Pause, RefreshCw, Download, Upload
+  AlertCircle, AlertTriangle, HelpCircle, Globe
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
+// 兼容小写引用，确保翻译逻辑不崩
 const translations = TRANSLATIONS;
+
 // --- Shared Components ---
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => (
   <AnimatePresence>
