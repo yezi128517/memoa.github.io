@@ -2,41 +2,37 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 终极图标包：包含 AI 助手、音量、多媒体及所有导航图标
- * 彻底解决 ReferenceError: Volume2 / Brain / Users 等报错
+ * 终极补齐：包含个人页 (Palette, Shield)、AI页 (Volume, Brain) 
+ * 以及所有可能导致 ReferenceError 的图标
  */
 import { 
-  // 1. 基础导航与布局
+  // 1. 基础导航
   Home, House, Search, MessageSquare, Heart, User, Users, Settings, 
   Menu, X, Plus, MoreHorizontal, MoreVertical, ChevronRight, ChevronLeft, 
-  ChevronDown, ChevronUp, Check, Layout, Grid, List,
 
-  // 2. AI 助手与智能感 (Memoa 核心)
-  Sparkles, Brain, Zap, Bot, Cpu, Wand2, Activity, Fingerprint, Eye, EyeOff,
-  
-  // 3. 音频与多媒体 (解决 Volume2 报错)
-  Mic, Music, Play, Pause, Volume, Volume1, Volume2, VolumeX,
-  SkipForward, SkipBack, Repeat, Shuffle, Headphones,
+  // 2. 个人页与视觉定制 (解决当前 Palette 报错)
+  Palette, Paintbrush, Sun, Moon, Languages, Globe, 
+  Shield, ShieldCheck, Lock, Unlock, Key, Bell, BellDot,
 
-  // 4. 记忆、时间与地点
+  // 3. AI 助手与音视频 (解决 Volume, Brain 报错)
+  Sparkles, Brain, Zap, Bot, Cpu, Wand2, Activity,
+  Mic, Music, Volume, Volume1, Volume2, VolumeX, Headphones,
+
+  // 4. 记忆与文件
   Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
-  Image as ImageIcon, Camera, Film,
+  Image as ImageIcon, Camera, Film, Trash2, Edit3, Share2,
 
-  // 5. 控制、过滤与列表
+  // 5. 控制与状态
   SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
-  Send, Share2, Trash2, Edit3, Edit, Write, RefreshCw,
-
-  // 6. 系统、安全与状态
-  Shield, ShieldCheck, Lock, Unlock, Key,
-  Cloud, CloudUpload, Bell, BellDot, LogOut, Info,
-  AlertCircle, AlertTriangle, HelpCircle, Globe
+  Send, RefreshCw, Download, Upload, Info, LogOut,
+  Check, AlertCircle, HelpCircle
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
-// 兼容小写引用，确保翻译逻辑不崩
+// 关键修正：定义内部引用，防止渲染逻辑报错
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
