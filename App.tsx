@@ -83,7 +83,7 @@ export default function App() {
   };
 
   const currentBlobs = moodColors[mood] || moodColors.serene;
-
+console.log("App is rendering!")
   return (
     <div className="relative min-h-screen w-full bg-slate-50">
       <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
