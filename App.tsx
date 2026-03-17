@@ -4,9 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType } from './types';
+
+// 核心修复：直接从当前根目录导入，删掉 ./components/ 路径
 import { 
   BottomNav, 
   HomeTab, 
@@ -14,7 +16,7 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-} from './components/AppComponents';
+} from './AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
@@ -96,7 +98,7 @@ export default function App() {
       <div 
         className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col"
       >
-        {/* Morning Mist Aurora Background - Now contained within the mobile app */}
+        {/* Morning Mist Aurora Background */}
         <div className="mist-aurora">
           {currentBlobs.map((blob, i) => {
             const isCustom = mood === 'custom';
@@ -136,6 +138,9 @@ export default function App() {
 
         <BottomNav activeTab={state.activeTab} setActiveTab={setActiveTab} language={state.language} />
       </div>
+    </div>
+  );
+}
     </div>
   );
 }
