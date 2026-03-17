@@ -2,37 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 终极补齐：包含个人页 (Palette, Shield)、AI页 (Volume, Brain) 
- * 以及所有可能导致 ReferenceError 的图标
+ * 终极补齐：一站式解决所有页面切换崩溃问题
+ * 涵盖了 Database, Palette, Volume2, Brain 等所有已发现和潜在的地雷
  */
 import { 
-  // 1. 基础导航
+  // 1. 基础导航与布局
   Home, House, Search, MessageSquare, Heart, User, Users, Settings, 
   Menu, X, Plus, MoreHorizontal, MoreVertical, ChevronRight, ChevronLeft, 
+  ChevronDown, ChevronUp, Check, Layout, Grid, List,
 
-  // 2. 个人页与视觉定制 (解决当前 Palette 报错)
-  Palette, Paintbrush, Sun, Moon, Languages, Globe, 
+  // 2. 个人页、设置与数据库 (解决当前 Database, Palette 报错)
+  Database, Palette, Paintbrush, Sun, Moon, Languages, Globe, 
   Shield, ShieldCheck, Lock, Unlock, Key, Bell, BellDot,
 
-  // 3. AI 助手与音视频 (解决 Volume, Brain 报错)
+  // 3. AI 助手与音频 (解决 Volume2, Brain 报错)
   Sparkles, Brain, Zap, Bot, Cpu, Wand2, Activity,
   Mic, Music, Volume, Volume1, Volume2, VolumeX, Headphones,
 
-  // 4. 记忆与文件
+  // 4. 记忆、时间与文件
   Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
   Image as ImageIcon, Camera, Film, Trash2, Edit3, Share2,
 
-  // 5. 控制与状态
+  // 5. 控制、状态与反馈
   SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
   Send, RefreshCw, Download, Upload, Info, LogOut,
-  Check, AlertCircle, HelpCircle
+  AlertCircle, AlertTriangle, HelpCircle, Fingerprint, Eye, EyeOff
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
-// 关键修正：定义内部引用，防止渲染逻辑报错
+// 确保翻译引用不会导致 ReferenceError
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
