@@ -113,19 +113,15 @@ return (
   </div>
 );
         <AnimatePresence mode="wait">
-          <motion.div
-            key={state.activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-32 relative z-10"
-          >
-            {renderTab()}
-          </motion.div>
-        </AnimatePresence>
+          
+ {/* 1. 确保这里没有多余的冒号或分号 */}
+      <BottomNav 
+        activeTab={state.activeTab} 
+        // 2. 这里的 setActiveTab 需要改为 dispatch 模式
+        setActiveTab={(tab) => dispatch({ type: 'SET_TAB', payload: tab })} 
+        language={state.language} 
+      />
 
-        <BottomNav activeTab={state.activeTab} setActiveTab={setActiveTab} language={state.language} />
-      </div>
-    </div>
-  );
-}
+    </div> {/* 这个闭合的是那个 max-w-[420px] 的 div */}
+  </div>   {/* 这个闭合的是最外层的 min-h-screen 的 div */}
+); // 这是 return 的结束
