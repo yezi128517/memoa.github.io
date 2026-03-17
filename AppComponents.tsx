@@ -1,11 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 确保这里是大写
+// 1. 确保把 Heart 加进导入列表里
+import { 
+  Search, 
+  Filter, 
+  User, 
+  Settings, 
+  MessageSquare, 
+  Heart,      // 必须加上这行
+  Calendar, 
+  MapPin, 
+  MoreHorizontal, 
+  Plus,
+  Send,
+  Mic,
+  Music,
+  LogOut,
+  ChevronRight,
+  Shield,
+  Cloud,
+  Bell,
+  Lock
+} from 'lucide-react'; 
+
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
-// 关键修正：定义一个内部小写的引用，防止你后面的代码报错
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
