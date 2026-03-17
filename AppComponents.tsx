@@ -1,10 +1,12 @@
-const translations = TRANSLATIONS;
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 核心修复：删掉 ../ 直接从当前目录导入
+// 确保这里是大写
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
+
+// 关键修正：定义一个内部小写的引用，防止你后面的代码报错
+const translations = TRANSLATIONS;
 
 // --- Shared Components ---
 
