@@ -2,34 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 核心修复：一次性导入所有可能用到的图标组件
- * 彻底解决 ReferenceError: [IconName] is not defined
+ * 终极补齐：包含所有潜在的页面图标，防止任何切换崩溃
  */
 import { 
-  // 基础导航
-  Home, House, Search, MessageSquare, Heart, User, Users, Settings,
+  // 1. 基础导航 & 布局
+  Home, House, Search, MessageSquare, Heart, User, Users, Settings, 
+  Menu, X, Plus, MoreHorizontal, MoreVertical, ChevronRight, ChevronLeft, 
+  ChevronDown, ChevronUp, Check,
+
+  // 2. 记忆 & 情感 (Memoa 核心)
+  Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
+  Image as ImageIcon, Camera, Film, Mic, Music, 
+  Smile, Frown, Meh, Sun, Moon,
+
+  // 3. AI & 科技感 (高级感必备)
+  Sparkles, Brain, Zap, Bot, Cpu, Wand2, 
+  Activity, Fingerprint, Eye, EyeOff,
+
+  // 4. 列表过滤 & 控制 (解决你目前的报错)
+  SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
   
-  // AI 与 智能功能
-  Sparkles, Brain, Zap, Bot, Cpu, Wand2,
-  
-  // 记忆与记录
-  Calendar, Clock, History, MapPin, Plus, MoreHorizontal, Star, 
-  Book, Bookmark, Image as ImageIcon,
-  
-  // 交互与多媒体
-  Send, Mic, Music, Play, Pause, ChevronRight, ChevronLeft,
-  
-  // 安全与系统
-  Shield, Cloud, Bell, Lock, LogOut, Info, Share2, Trash2, Edit3, Check, X
+  // 5. 系统 & 功能
+  Send, Share2, Trash2, Edit3, Edit, 
+  Shield, ShieldCheck, Lock, Unlock, Key,
+  Cloud, CloudUpload, Bell, BellDot, LogOut, Info,
+  Play, Pause, RefreshCw, Download, Upload
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
-// 兼容你代码中可能使用的小写引用
 const translations = TRANSLATIONS;
-
 // --- Shared Components ---
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => (
   <AnimatePresence>
