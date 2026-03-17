@@ -14,7 +14,7 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-} from './components/AppComponents';
+import { ... } from './src/components/AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
