@@ -84,19 +84,34 @@ export default function App() {
 
   const currentBlobs = moodColors[mood] || moodColors.serene;
 console.log("App is rendering!")
-  return (
-    <div className="relative min-h-screen w-full bg-slate-50">
-      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
-        
-        {/* 背景层 */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {currentBlobs.map((blob, i) => (
-            <div key={i} className={`absolute rounded-full blur-3xl opacity-20 ${blob} ${
+return (
+  <div 
+    className="relative min-h-screen w-full bg-slate-50 transition-colors duration-700"
+    // 1. 核心修改：将自定义颜色注入为 CSS 变量 --accent-color
+    style={{ 
+      '--accent-color': state.themeColor || '#3B82F6',
+    } as React.CSSProperties}
+  >
+    <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
+      
+      {/* 背景层 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {currentBlobs.map((blob, i) => (
+          <div 
+            key={i} 
+            className={`absolute rounded-full blur-3xl opacity-20 transition-all duration-1000 ${
+              // 2. 如果你的 blob 颜色想随主题变，可以用 style 覆盖
               i === 0 ? "w-96 h-96 -top-20 -left-20" : i === 1 ? "w-80 h-80 top-1/2 -right-20" : "w-64 h-64 bottom-10 left-10"
-            }`} />
-          ))}
-        </div>
+            }`} 
+            style={{ backgroundColor: 'var(--accent-color)' }} // 背景光晕随主题色变化
+          />
+        ))}
+      </div>
 
+      {/* 你的其他组件，如 Header, MainContent, Navigation */}
+    </div>
+  </div>
+);
         <AnimatePresence mode="wait">
           <motion.div
             key={state.activeTab}
