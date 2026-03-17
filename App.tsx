@@ -4,11 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType } from './types';
-
-// 组件导入
 import { 
   BottomNav, 
   HomeTab, 
@@ -16,13 +14,12 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-} from './AppComponents';
+} from './components/AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [mood, setMood] = useState<string>('serene');
 
-  // 这里的 setActiveTab 保持与 BottomNav 约定的 Props 一致
   const setActiveTab = (tab: TabType) => {
     setState(prev => ({ ...prev, activeTab: tab }));
   };
@@ -31,7 +28,6 @@ export default function App() {
     setState(prev => ({ ...prev, featuredLiked: !prev.featuredLiked }));
   };
 
-  // 监听全局切换事件
   useEffect(() => {
     const handleSetTab = (e: any) => {
       if (e.detail) setActiveTab(e.detail);
@@ -40,20 +36,24 @@ export default function App() {
     return () => window.removeEventListener('setTab', handleSetTab);
   }, []);
 
-  // 渲染不同的页面内容
+  // Simulate storage alert
+  useEffect(() => {
+    if (state.storageUsage >= 88) {
+      console.log("Memoa：存储占用已达 88%，建议进行断舍离，删除一些重复的照片。");
+    }
+  }, [state.storageUsage]);
+
   const renderTab = () => {
     switch (state.activeTab) {
-      case '主页': return <HomeTab key="home" state={state} onToggleLike={toggleFeaturedLike} />;
+      case '主页': return <HomeTab state={state} onToggleLike={toggleFeaturedLike} />;
       case '记忆': return (
         <MemoryTab 
-          key="memory"
           state={state} 
           onAddMemory={(m) => setState(prev => ({ ...prev, memories: [m, ...prev.memories] }))} 
         />
       );
       case 'AI助手': return (
         <AIAssistantTab 
-          key="ai"
           state={state} 
           mood={mood} 
           onAddMusic={(app) => setState(prev => ({ ...prev, musicApps: [...prev.musicApps, app] }))}
@@ -61,17 +61,16 @@ export default function App() {
           onAddMemory={(m) => setState(prev => ({ ...prev, memories: [m, ...prev.memories] }))}
         />
       );
-      case '关系': return <RelationshipsTab key="rel" state={state} />;
+      case '关系': return <RelationshipsTab state={state} />;
       case '个人': return (
         <ProfileTab 
-          key="profile"
           state={state} 
           mood={mood} 
           onMoodChange={(m: any) => setMood(m)} 
           onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
         />
       );
-      default: return <HomeTab key="def" state={state} />;
+      default: return <HomeTab state={state} />;
     }
   };
 
@@ -86,55 +85,58 @@ export default function App() {
     slate: ['bg-slate-700/20', 'bg-slate-900/10', 'bg-slate-800/10'],
     lavender: ['bg-violet-400/20', 'bg-purple-500/10', 'bg-indigo-400/10'],
     gold: ['bg-yellow-500/20', 'bg-amber-600/10', 'bg-orange-400/10'],
+    custom: state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee'],
   };
 
   const currentBlobs = moodColors[mood] || moodColors.serene;
 
   return (
-    <div 
-      className="relative min-h-screen w-full bg-slate-50 transition-colors duration-700"
-      style={{ 
-        '--accent-color': state.themeColor || '#3B82F6',
-      } as React.CSSProperties}
-    >
-      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
-        
-        {/* 背景层 */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {currentBlobs.map((blob, i) => (
-            <div 
-              key={i} 
-              className={`absolute rounded-full blur-3xl opacity-20 transition-all duration-1000 ${
-                i === 0 ? "w-96 h-96 -top-20 -left-20" : i === 1 ? "w-80 h-80 top-1/2 -right-20" : "w-64 h-64 bottom-10 left-10"
-              }`} 
-              style={{ backgroundColor: 'var(--accent-color)' }} 
-            />
-          ))}
+    <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-slate-50">
+      {/* Main Content Container - Mobile App Structure */}
+      <div 
+        className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col"
+      >
+        {/* Morning Mist Aurora Background - Now contained within the mobile app */}
+        <div className="mist-aurora">
+          {currentBlobs.map((blob, i) => {
+            const isCustom = mood === 'custom';
+            // If custom, blob is a hex code. If standard, blob is a tailwind class.
+            const style = isCustom ? { backgroundColor: blob, opacity: i === 0 ? 0.4 : 0.2 } : {};
+            const className = isCustom ? 
+              `aurora-blob transition-all duration-1000` : 
+              `aurora-blob transition-all duration-1000 ${blob}`;
+            
+            const sizes = [
+              "w-[800px] h-[800px] -top-64 -left-64",
+              "w-[1000px] h-[1000px] top-1/4 -right-64",
+              "w-[600px] h-[600px] bottom-0 left-1/4"
+            ];
+
+            return (
+              <div 
+                key={i} 
+                className={`${className} ${sizes[i]}`} 
+                style={style}
+              />
+            );
+          })}
         </div>
 
-        {/* 内容区域：使用 AnimatePresence 实现切换动画 */}
-        <main className="flex-1 overflow-y-auto relative z-10 pb-24">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={state.activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="h-full"
-            >
-              {renderTab()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state.activeTab}
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.02, y: -10 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-32"
+          >
+            {renderTab()}
+          </motion.div>
+        </AnimatePresence>
 
-        {/* 底部导航栏 */}
-        <BottomNav 
-          activeTab={state.activeTab} 
-          setActiveTab={setActiveTab} 
-          language={state.language} 
-        />
+        <BottomNav activeTab={state.activeTab} setActiveTab={setActiveTab} language={state.language} />
       </div>
     </div>
   );
-};
+}
