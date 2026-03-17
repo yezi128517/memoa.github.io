@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 1. 确保把 Heart 加进导入列表里
+// 补全所有图标导入，解决 Sparkles is not defined 报错
 import { 
   Search, 
   Filter, 
   User, 
   Settings, 
   MessageSquare, 
-  Heart,      // 必须加上这行
+  Heart,      
   Calendar, 
   MapPin, 
   MoreHorizontal, 
@@ -20,7 +20,10 @@ import {
   Shield,
   Cloud,
   Bell,
-  Lock
+  Lock,
+  Sparkles,    // 核心修复：添加这个图标
+  Zap,         // 备用图标：闪电
+  Star         // 备用图标：星星
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
@@ -30,7 +33,6 @@ import { CATEGORIES } from './constants';
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
-
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => (
   <AnimatePresence>
     {isOpen && (
