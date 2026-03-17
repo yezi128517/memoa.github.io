@@ -1241,7 +1241,30 @@ export const ProfileTab: React.FC<{
   onMoodChange?: (mood: any) => void,
   onUpdateState?: (updates: Partial<AppState>) => void
 }> = ({ state, mood, onMoodChange, onUpdateState }) => {
-  // 定义可选的主题色列表
+  const t = (key: string) => translations[state.language]?.[key] || key;
+
+  // --- 1. 所有 State 必须放在最上面 ---
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeSetting, setActiveSetting] = useState<string | null>(null);
+  const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
+  const [customColors, setCustomColors] = useState(['#f472b6', '#fef08a', '#22d3ee']);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  
+  const [settingsState, setSettingsState] = useState({
+    faceId: true,
+    encryption: true,
+    stealth: false,
+    reminders: true,
+    insights: false,
+    milestones: true,
+    displayName: 'Memoa 用户',
+    email: 'yezi128517@gmail.com',
+    phone: '+86 138 **** 5678',
+    region: '上海, 中国',
+    language: state.language
+  });
+
+  // --- 2. 逻辑处理函数 ---
   const themeColors = [
     { label: '默认蓝', value: '#3B82F6' },
     { label: '薄荷绿', value: '#10B981' },
@@ -1251,48 +1274,144 @@ export const ProfileTab: React.FC<{
     { label: '樱花粉', value: '#EC4899' }
   ];
 
-  return (
-    <div className="p-6 space-y-8 pb-32">
-      {/* 个人信息头部 */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-2xl shadow-sm">👤</div>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">Designer User</h2>
-          <p className="text-sm text-slate-400">Class of 2027</p>
-        </div>
-      </div>
+  const handleSettingClick = (key: string) => {
+    setActiveSetting(key);
+    setIsSettingsOpen(true);
+  };
 
-      {/* 核心修改：主题色彩选择区域 */}
-      <section className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">主题色彩 / Theme Color</h3>
-        <div className="bg-slate-50/50 rounded-[32px] p-6 flex flex-wrap gap-5 justify-between shadow-inner">
+  const toggleSetting = (key: keyof typeof settingsState) => {
+    setSettingsState(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleBackup = () => {
+    setIsBackingUp(true);
+    setTimeout(() => setIsBackingUp(false), 2000);
+  };
+
+  const handleCustomColorChange = (index: number, value: string) => {
+    const newColors = [...customColors];
+    newColors[index] = value;
+    setCustomColors(newColors);
+    onUpdateState?.({ 
+      customMoodColors: newColors.map(c => `bg-[${c}]/20`) 
+    });
+  };
+
+  const handleApplyCustomColors = () => {
+    onUpdateState?.({ 
+      customMoodColors: customColors.map(c => `bg-[${c}]/20`) 
+    });
+    onMoodChange?.('custom');
+    setIsCustomColorOpen(false);
+  };
+
+  // --- 3. 设置弹窗内容渲染 ---
+  const getSettingContent = () => {
+    switch (activeSetting) {
+      case 'profile':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-5 rounded-3xl bg-white/40 border border-white/40 shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden border-2 border-white relative group">
+                <img src="https://picsum.photos/seed/memoa-user/400/400" alt="avatar" />
+              </div>
+              <div className="flex-1">
+                <input 
+                  type="text" 
+                  value={settingsState.displayName} 
+                  onChange={(e) => setSettingsState(prev => ({ ...prev, displayName: e.target.value }))}
+                  className="bg-transparent text-lg font-black text-slate-900 focus:outline-none w-full" 
+                />
+                <p className="text-xs text-slate-400">{t('Memory Architect')}</p>
+              </div>
+            </div>
+            <button onClick={() => setIsSettingsOpen(false)} className="w-full py-4 active-drop text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">{t('Save All Changes')}</button>
+          </div>
+        );
+      case 'language':
+        return (
+          <div className="space-y-6">
+            <div className="sculpted-glass rounded-3xl overflow-hidden border border-white/40">
+              {['简体中文', 'English', '日本語', '한국어'].map((lang) => (
+                <button 
+                  key={lang}
+                  onClick={() => setSettingsState(prev => ({ ...prev, language: lang }))}
+                  className="w-full p-4 flex justify-between items-center border-b border-white/20 last:border-none"
+                >
+                  <span className={`text-sm ${settingsState.language === lang ? 'font-black text-emerald-500' : 'font-bold text-slate-900'}`}>{lang}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { onUpdateState?.({ language: settingsState.language }); setIsSettingsOpen(false); }} className="w-full py-4 active-drop text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">{t('Save and Apply')}</button>
+          </div>
+        );
+      default: return <p>{t('Settings content coming soon...')}</p>;
+    }
+  };
+
+  // --- 4. 唯一的 Return ---
+  return (
+    <div className="p-8 space-y-12 flex flex-col items-center flex-1 pb-32">
+      <header className="w-full relative text-center space-y-8 pt-6">
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 90 }}
+          onClick={() => setIsSettingsOpen(true)}
+          className="absolute top-0 right-0 p-4 text-slate-400"
+        >
+          <Settings size={24} strokeWidth={1.5} />
+        </motion.button>
+        <div className="w-40 h-40 rounded-full sculpted-glass p-1.5 shadow-2xl border border-white/40 mx-auto">
+          <img src="https://picsum.photos/seed/memoa-user/400/400" className="w-full h-full rounded-full object-cover" alt="avatar" />
+        </div>
+        <div className="space-y-1">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{settingsState.displayName}</h1>
+          <p className="text-slate-400 text-[10px] font-bold tracking-[0.4em] uppercase">{t('Memory Architect')}</p>
+        </div>
+      </header>
+
+      {/* 主题颜色选择 - 核心功能 */}
+      <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6">
+        <div className="flex items-center gap-3">
+          <Palette size={18} className="text-slate-500" strokeWidth={1.5} />
+          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">主题色彩 / Theme Color</h2>
+        </div>
+        <div className="flex flex-wrap gap-4 justify-between px-2">
           {themeColors.map((color) => (
             <button
               key={color.value}
-              type="button"
-              // 关键：点击这里，数据会通过 onUpdateState 传回给 App.tsx
-              onClick={() => {
-                console.log("Setting theme color:", color.value);
-                onUpdateState?.({ themeColor: color.value });
-              }}
+              onClick={() => onUpdateState?.({ themeColor: color.value })}
               className={`relative w-10 h-10 rounded-full transition-all duration-500 ${
-                state.themeColor === color.value 
-                  ? 'scale-125 shadow-lg' 
-                  : 'hover:scale-110 opacity-60 hover:opacity-100'
+                state.themeColor === color.value ? 'scale-125 shadow-lg ring-4 ring-white' : 'opacity-60 hover:opacity-100'
               }`}
               style={{ backgroundColor: color.value }}
-            >
-              {/* 选中时的外圈光晕 */}
-              {state.themeColor === color.value && (
-                <motion.div 
-                  layoutId="activeTheme"
-                  className="absolute -inset-2 rounded-full border-2 border-white shadow-sm"
-                />
-              )}
-            </button>
+            />
           ))}
         </div>
       </section>
+
+      {/* 设置列表 */}
+      <div className="w-full space-y-4">
+        {[
+          { key: 'profile', label: t('Profile Settings'), icon: User },
+          { key: 'language', label: t('Language Settings'), icon: SlidersHorizontal },
+        ].map((item, i) => (
+          <button 
+            key={i}
+            onClick={() => handleSettingClick(item.key)}
+            className="w-full sculpted-glass p-6 rounded-[28px] flex items-center justify-between text-slate-500"
+          >
+            <div className="flex items-center gap-5">
+              <item.icon size={22} strokeWidth={1.5} />
+              <span className="text-sm font-bold tracking-tight uppercase">{item.label}</span>
+            </div>
+            <ChevronRight size={22} />
+          </button>
+        ))}
+      </div>
+
+      <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title={t('Settings')}>
+        {getSettingContent()}
+      </Modal>
     </div>
   );
 };
