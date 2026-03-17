@@ -56,48 +56,11 @@ export default function App() {
     }
   };
 
-  // 核心修复：获取当前选中的主题色，如果没有就默认蓝色
+  // 核心：获取当前选中的主题色，没选就是默认蓝色
   const currentThemeColor = state.themeColor || '#3B82F6';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100 relative overflow-hidden">
       
-      {/* 背景装饰圆点：直接绑定颜色，点哪个变哪个，过渡极其丝滑 */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div 
-          className="absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl transition-colors duration-700 opacity-20" 
-          style={{ backgroundColor: currentThemeColor }} 
-        />
-        <div 
-          className="absolute top-1/2 -right-24 w-80 h-80 rounded-full blur-3xl transition-colors duration-700 opacity-20" 
-          style={{ backgroundColor: currentThemeColor }} 
-        />
-        <div 
-          className="absolute -bottom-24 left-1/4 w-96 h-96 rounded-full blur-3xl transition-colors duration-700 opacity-20" 
-          style={{ backgroundColor: currentThemeColor }} 
-        />
-      </div>
-
-      <main className="flex-1 overflow-y-auto relative z-10 pb-24">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={state.activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="h-full"
-          >
-            {renderTab()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      <BottomNav 
-        activeTab={state.activeTab} 
-        setActiveTab={setActiveTab} 
-        language={state.language} 
-      />
-    </div>
-  );
-}
+      {/* 这里的 sm:max-w-[420px] 保留了你的手机外壳居中设计 */}
+      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded
