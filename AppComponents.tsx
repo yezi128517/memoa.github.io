@@ -1264,7 +1264,7 @@ export const ProfileTab: React.FC<{
   });
 
   const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
-  const [customColors, setCustomColors] = useState(['#f472b6', '#fef08a', '#22d3ee']);
+  const [customColors, setCustomColors] = useState(state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee']);
 
   const handleCustomColorChange = (index: number, value: string) => {
     const newColors = [...customColors];
@@ -1275,13 +1275,13 @@ export const ProfileTab: React.FC<{
     // But since we can't easily map hex to tailwind bg- classes, 
     // I'll just simulate it by updating the state with a special format if needed.
     onUpdateState?.({ 
-      customMoodColors: newColors.map(c => `bg-[${c}]/20`) 
+      customMoodColors: newColors
     });
   };
 
   const handleApplyCustomColors = () => {
     onUpdateState?.({ 
-      customMoodColors: customColors.map(c => `bg-[${c}]/20`) 
+      customMoodColors: customColors
     });
     onMoodChange?.('custom');
     setIsCustomColorOpen(false);
