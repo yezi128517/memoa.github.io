@@ -1235,7 +1235,7 @@ export const RelationshipsTab: React.FC<{ state: AppState }> = ({ state }) => {
   );
 };
 
-// 1. 导出 Modal 组件
+// 必须确保这里有 export
 export const Modal = ({ isOpen, onClose, title, children }: any) => {
   if (!isOpen) return null;
   return (
@@ -1259,9 +1259,8 @@ export const Modal = ({ isOpen, onClose, title, children }: any) => {
   );
 };
 
-// 2. ProfileTab 组件
 export const ProfileTab: React.FC<any> = ({ 
-  state, mood, onMoodChange, onUpdateState, t = (s: string) => s, Modal: ModalComponent 
+  state, onUpdateState, t = (s: string) => s, Modal: ModalComponent 
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
@@ -1275,105 +1274,37 @@ export const ProfileTab: React.FC<any> = ({
     { label: '樱花粉', value: '#EC4899' }
   ];
 
-  const renderSettingDetail = () => {
-    switch (activeSetting) {
-      case 'profile':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 p-5 rounded-3xl bg-white/40 border border-white/40 shadow-sm">
-              <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden relative">
-                <img src="https://picsum.photos/seed/memoa-user/400/400" alt="avatar" className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-lg font-black text-slate-900">Designer User</h4>
-                <p className="text-xs text-slate-400">Class of 2027</p>
-              </div>
-            </div>
-            <button onClick={() => setIsSettingsOpen(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">
-              {t('Close')}
-            </button>
-          </div>
-        );
-      case 'language':
-        return (
-          <div className="space-y-4">
-            {['简体中文', 'English', '日本語'].map(lang => (
-              <button 
-                key={lang}
-                onClick={() => onUpdateState?.({ language: lang })}
-                className="w-full p-4 sculpted-glass rounded-2xl flex justify-between items-center"
-              >
-                <span className="font-bold">{lang}</span>
-                {state.language === lang && <div className="w-2 h-2 rounded-full bg-emerald-400" />}
-              </button>
-            ))}
-          </div>
-        );
-      default:
-        return <div className="py-10 text-center text-slate-400">{t('Coming Soon')}</div>;
-    }
-  };
-
   return (
     <div className="p-8 space-y-12 flex flex-col items-center flex-1 pb-32">
       <header className="w-full relative text-center space-y-8 pt-6">
-        <button onClick={() => setIsSettingsOpen(true)} className="absolute top-0 right-0 p-4 text-slate-400 hover:text-slate-900 transition-colors">
+        <button onClick={() => { setActiveSetting('profile'); setIsSettingsOpen(true); }} className="absolute top-0 right-0 p-4 text-slate-400">
           <Settings size={24} />
         </button>
-        <div className="relative inline-block">
-          <div className="w-40 h-40 rounded-full sculpted-glass p-1.5 shadow-2xl border border-white/40 overflow-hidden">
-            <img src="https://picsum.photos/seed/memoa-user/400/400" className="w-full h-full object-cover" alt="avatar" />
-          </div>
+        <div className="w-40 h-40 rounded-full sculpted-glass p-1.5 shadow-2xl border border-white/40 overflow-hidden mx-auto">
+          <img src="https://picsum.photos/seed/memoa-user/400/400" className="w-full h-full object-cover" alt="avatar" />
         </div>
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight">Designer User</h1>
-          <p className="text-slate-400 text-[10px] font-bold tracking-[0.4em] uppercase mt-1">Class of 2027</p>
+          <p className="text-slate-400 text-[10px] font-bold tracking-[0.4em] uppercase">Class of 2027</p>
         </div>
       </header>
 
       <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6">
-        <div className="flex items-center gap-3">
-          <Palette size={18} className="text-slate-500" />
-          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">{t('Theme Color')}</h2>
-        </div>
+        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">主题色</h2>
         <div className="flex flex-wrap gap-5 justify-between">
           {themeColors.map((color) => (
             <button
               key={color.value}
               onClick={() => onUpdateState?.({ themeColor: color.value })}
-              className={`relative w-10 h-10 rounded-full transition-all duration-300 ${
-                state.themeColor === color.value 
-                  ? 'scale-125 shadow-xl border-[3px] border-white' 
-                  : 'opacity-60 hover:opacity-100 border-2 border-transparent hover:scale-110'
-              }`}
+              className={`w-10 h-10 rounded-full transition-all ${state.themeColor === color.value ? 'scale-125 shadow-lg border-4 border-white' : 'opacity-60'}`}
               style={{ backgroundColor: color.value }}
             />
           ))}
         </div>
       </section>
 
-      <div className="w-full space-y-4">
-        {[
-          { key: 'profile', label: 'Profile Settings', icon: User },
-          { key: 'language', label: 'Language Settings', icon: SlidersHorizontal },
-          { key: 'privacy', label: 'Privacy & Security', icon: ShieldCheck },
-        ].map((item) => (
-          <button 
-            key={item.key}
-            onClick={() => { setActiveSetting(item.key); setIsSettingsOpen(true); }}
-            className="w-full sculpted-glass p-6 rounded-[28px] flex items-center justify-between text-slate-500 hover:text-slate-900 transition-all border border-white/20 hover:bg-white/40"
-          >
-            <div className="flex items-center gap-5">
-              <item.icon size={22} />
-              <span className="text-sm font-bold tracking-tight uppercase">{t(item.label)}</span>
-            </div>
-            <ChevronRight size={22} />
-          </button>
-        ))}
-      </div>
-
-      <ModalComponent isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title={t('Settings')}>
-        {renderSettingDetail()}
+      <ModalComponent isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="设置">
+        <div className="py-10 text-center text-slate-400">设置功能开发中</div>
       </ModalComponent>
     </div>
   );
