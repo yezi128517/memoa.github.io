@@ -83,8 +83,14 @@ export default function App() {
     custom: state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee'],
   };
 
-  const currentBlobs = moodColors[mood] || moodColors.serene;
-
+{currentBlobs.map((blob, i) => {
+  const isCustom = mood === 'custom';
+  // 关键：如果是自定义颜色，直接使用 blob 作为背景色
+  const style = isCustom ? { backgroundColor: blob, opacity: i === 0 ? 0.4 : 0.2 } : {};
+  const className = isCustom ? 
+    `aurora-blob transition-all duration-1000` : 
+    `aurora-blob transition-all duration-1000 ${blob}`;
+  
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-slate-50">
       {/* Main Content Container - Mobile App Structure */}
