@@ -1235,17 +1235,45 @@ export const RelationshipsTab: React.FC<{ state: AppState }> = ({ state }) => {
   );
 };
 
-// --- Profile Tab ---
-
-export const ProfileTab: React.FC<{ 
-  state: AppState, 
-  mood?: string, 
-  onMoodChange?: (mood: any) => void,
-  onUpdateState?: (updates: Partial<AppState>) => void
-}> = ({ state, mood, onMoodChange, onUpdateState }) => {
-  const t = (key: string) => translations[state.language]?.[key] || key;
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeSetting, setActiveSetting] = useState<string | null>(null);
+{/* --- 颜色选择模块开始 --- */}
+<div className="mt-8 px-4">
+  <h3 className="text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">
+    {state.language === 'zh' ? '个性化色彩' : 'Theme Color'}
+  </h3>
+  
+  <div className="flex flex-wrap gap-4 p-4 bg-slate-50 rounded-[32px] justify-between shadow-inner">
+    {[
+      { label: 'Classic', value: '#3B82F6' },
+      { label: 'Mint', value: '#10B981' },
+      { label: 'Amber', value: '#F59E0B' },
+      { label: 'Rose', value: '#EF4444' },
+      { label: 'Violet', value: '#8B5CF6' },
+      { label: 'Sakura', value: '#EC4899' }
+    ].map((item) => (
+      <button
+        key={item.value}
+        // 关键点：这里必须调用 onUpdateState，数据才会传回 App.tsx
+        onClick={() => onUpdateState?.({ themeColor: item.value })}
+        className={`group relative w-10 h-10 rounded-full transition-all duration-500 ease-out ${
+          state.themeColor === item.value 
+            ? 'scale-125 shadow-lg' 
+            : 'hover:scale-110 opacity-70 hover:opacity-100'
+        }`}
+        style={{ backgroundColor: item.value }}
+      >
+        {/* 选中时的光圈效果 */}
+        {state.themeColor === item.value && (
+          <motion.div 
+            layoutId="activeColor"
+            className="absolute -inset-1.5 rounded-full border-2 border-white shadow-[0_0_15px_rgba(0,0,0,0.1)]"
+            style={{ borderColor: 'white' }}
+          />
+        )}
+      </button>
+    ))}
+  </div>
+</div>
+{/* --- 颜色选择模块结束 --- */}
   
   // Local state for interactivity
   const [settingsState, setSettingsState] = useState({
