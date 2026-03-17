@@ -15,22 +15,14 @@ import {
   MemoryTab, 
   AIAssistantTab, 
   RelationshipsTab, 
-  ProfileTab,
-  Modal // 确保导入了 Modal 组件
+  ProfileTab 
 } from './AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [mood, setMood] = useState<string>('serene');
 
-  // 定义简单的翻译辅助函数防止报错
-  const t = (key: string) => key;
-
-  // 状态更新函数
-  const handleUpdateState = (updates: Partial<AppState>) => {
-    setState(prev => ({ ...prev, ...updates }));
-  };
-
+  // 这里的 setActiveTab 保持与 BottomNav 约定的 Props 一致
   const setActiveTab = (tab: TabType) => {
     setState(prev => ({ ...prev, activeTab: tab }));
   };
@@ -76,16 +68,13 @@ export default function App() {
           state={state} 
           mood={mood} 
           onMoodChange={(m: any) => setMood(m)} 
-          onUpdateState={handleUpdateState}
-          Modal={Modal}
-          t={t}
+          onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
         />
       );
       default: return <HomeTab key="def" state={state} />;
     }
   };
 
-  // 氛围颜色定义
   const moodColors: Record<string, string[]> = {
     serene: ['bg-slate-400/20', 'bg-slate-500/10', 'bg-slate-300/10'],
     energetic: ['bg-yellow-400/20', 'bg-lime-400/10', 'bg-amber-400/10'],
@@ -102,35 +91,50 @@ export default function App() {
   const currentBlobs = moodColors[mood] || moodColors.serene;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100 relative overflow-hidden">
-      {/* 背景装饰圆点 */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className={`absolute -top-24 -left-24 w-96 h-96 rounded-full blur-3xl transition-colors duration-1000 ${currentBlobs[0]}`} />
-        <div className={`absolute top-1/2 -right-24 w-80 h-80 rounded-full blur-3xl transition-colors duration-1000 ${currentBlobs[1]}`} />
-        <div className={`absolute -bottom-24 left-1/4 w-96 h-96 rounded-full blur-3xl transition-colors duration-1000 ${currentBlobs[2]}`} />
+    <div 
+      className="relative min-h-screen w-full bg-slate-50 transition-colors duration-700"
+      style={{ 
+        '--accent-color': state.themeColor || '#3B82F6',
+      } as React.CSSProperties}
+    >
+      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
+        
+        {/* 背景层 */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {currentBlobs.map((blob, i) => (
+            <div 
+              key={i} 
+              className={`absolute rounded-full blur-3xl opacity-20 transition-all duration-1000 ${
+                i === 0 ? "w-96 h-96 -top-20 -left-20" : i === 1 ? "w-80 h-80 top-1/2 -right-20" : "w-64 h-64 bottom-10 left-10"
+              }`} 
+              style={{ backgroundColor: 'var(--accent-color)' }} 
+            />
+          ))}
+        </div>
+
+        {/* 内容区域：使用 AnimatePresence 实现切换动画 */}
+        <main className="flex-1 overflow-y-auto relative z-10 pb-24">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={state.activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="h-full"
+            >
+              {renderTab()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+        {/* 底部导航栏 */}
+        <BottomNav 
+          activeTab={state.activeTab} 
+          setActiveTab={setActiveTab} 
+          language={state.language} 
+        />
       </div>
-
-      <main className="flex-1 overflow-y-auto relative z-10 pb-24">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={state.activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="h-full"
-          >
-            {renderTab()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      {/* 底部导航栏 */}
-      <BottomNav 
-        activeTab={state.activeTab} 
-        setActiveTab={setActiveTab} 
-        language={state.language} 
-      />
     </div>
   );
 }
