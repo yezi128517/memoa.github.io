@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 补全所有图标导入，解决 Sparkles is not defined 报错
+/**
+ * 核心修复：补全所有缺失的图标组件
+ * 如果你代码里用了 <Home />，请确保这里导出了 Home
+ */
 import { 
   Search, 
   Filter, 
@@ -21,9 +24,13 @@ import {
   Cloud,
   Bell,
   Lock,
-  Sparkles,    // 核心修复：添加这个图标
-  Zap,         // 备用图标：闪电
-  Star         // 备用图标：星星
+  Sparkles,
+  Zap,
+  Star,
+  Home,        // 必须加上这个，解决 Home is not defined
+  House,       // 备选，部分版本 Lucide 使用 House 替代 Home
+  Clock,       // 常用备份
+  History      // 常用备份
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
