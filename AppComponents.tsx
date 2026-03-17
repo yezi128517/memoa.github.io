@@ -1253,14 +1253,38 @@ interface ProfileTabProps {
   Modal: any;
 }
 
+// --- 复制下面所有内容 ---
+
+// 1. 导出 Modal 组件，修复 App.tsx 找不到 Modal 的报错
+export const Modal = ({ isOpen, onClose, title, children }: any) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <motion.div 
+        initial={{ y: "100%" }} 
+        animate={{ y: 0 }} 
+        exit={{ y: "100%" }}
+        className="relative w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-[40px] shadow-2xl overflow-hidden border border-white/40"
+      >
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{title}</h3>
+            <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">×</button>
+          </div>
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// 2. 修正后的 ProfileTab 组件
 export const ProfileTab: React.FC<ProfileTabProps> = ({ 
-  state, mood, onMoodChange, onUpdateState, t = (s: string) => s, Modal 
+  state, mood, onMoodChange, onUpdateState, t = (s: string) => s, Modal: ModalComponent 
 }) => {
-  // 1. 内部状态声明
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
-  const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
-  const [customColors, setCustomColors] = useState(['#f472b6', '#fef08a', '#22d3ee']);
 
   const themeColors = [
     { label: '默认蓝', value: '#3B82F6' },
@@ -1271,7 +1295,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     { label: '樱花粉', value: '#EC4899' }
   ];
 
-  // 2. 渲染设置详情的辅助函数
   const renderSettingDetail = () => {
     switch (activeSetting) {
       case 'profile':
@@ -1311,10 +1334,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
     }
   };
 
-  // 3. 主界面返回
   return (
     <div className="p-8 space-y-12 flex flex-col items-center flex-1 pb-32">
-      {/* 头部信息 */}
       <header className="w-full relative text-center space-y-8 pt-6">
         <button onClick={() => setIsSettingsOpen(true)} className="absolute top-0 right-0 p-4 text-slate-400">
           <Settings size={24} />
@@ -1330,7 +1351,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         </div>
       </header>
 
-      {/* 主题颜色选择区 */}
       <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6">
         <div className="flex items-center gap-3">
           <Palette size={18} className="text-slate-500" />
@@ -1348,7 +1368,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         </div>
       </section>
 
-      {/* 底部菜单列表 */}
       <div className="w-full space-y-4">
         {[
           { key: 'profile', label: 'Profile Settings', icon: User },
@@ -1369,10 +1388,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         ))}
       </div>
 
-      {/* 弹窗组件 */}
-      <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title={t('Settings')}>
+      {/* 注意：这里使用传入的 ModalComponent 确保逻辑正确 */}
+      <ModalComponent isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title={t('Settings')}>
         {renderSettingDetail()}
-      </Modal>
+      </ModalComponent>
     </div>
   );
 };
