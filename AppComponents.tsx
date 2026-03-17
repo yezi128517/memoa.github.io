@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 /**
  * 终极补齐：一站式解决所有页面切换崩溃问题
@@ -1279,9 +1279,9 @@ export const ProfileTab: React.FC<{
     });
   };
 
-const handleApplyCustomColors = () => {
+  const handleApplyCustomColors = () => {
     onUpdateState?.({ 
-      customMoodColors: customColors // 确保这里只传 customColors，不要有任何字符串拼接
+      customMoodColors: customColors
     });
     onMoodChange?.('custom');
     setIsCustomColorOpen(false);
