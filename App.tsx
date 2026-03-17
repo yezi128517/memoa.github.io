@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType } from './types';
 
-// 注意这里：我帮你把 Modal 加上了！
+// 核心修复：这里必须包含 Modal，否则下面渲染会崩溃
 import { 
   BottomNav, 
   HomeTab, 
@@ -51,16 +51,16 @@ export default function App() {
     }
   };
 
-  // 这里的颜色会随 state.themeColor 实时变化
+  // 绑定颜色状态，默认蓝色
   const currentThemeColor = state.themeColor || '#3B82F6';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100 relative overflow-hidden">
       
-      {/* 居中手机容器 */}
+      {/* 手机容器外壳 */}
       <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
         
-        {/* 背景光晕 - 绑定颜色 */}
+        {/* 背景圆球变色逻辑 */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute rounded-full blur-3xl opacity-20 transition-colors duration-700 w-96 h-96 -top-20 -left-20" style={{ backgroundColor: currentThemeColor }} />
           <div className="absolute rounded-full blur-3xl opacity-20 transition-colors duration-700 w-80 h-80 top-1/2 -right-20" style={{ backgroundColor: currentThemeColor }} />
