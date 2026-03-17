@@ -1234,8 +1234,9 @@ export const RelationshipsTab: React.FC<{ state: AppState }> = ({ state }) => {
     </div>
   );
 };
+// --- 下面这段粘贴在 AppComponents.tsx 的最底部 ---
 
-// 必须确保这里有 export
+// 1. 弹窗组件 (必须导出，否则 App.tsx 会报错)
 export const Modal = ({ isOpen, onClose, title, children }: any) => {
   if (!isOpen) return null;
   return (
@@ -1259,11 +1260,11 @@ export const Modal = ({ isOpen, onClose, title, children }: any) => {
   );
 };
 
+// 2. 个人中心组件
 export const ProfileTab: React.FC<any> = ({ 
   state, onUpdateState, t = (s: string) => s, Modal: ModalComponent 
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeSetting, setActiveSetting] = useState<string | null>(null);
 
   const themeColors = [
     { label: '默认蓝', value: '#3B82F6' },
@@ -1277,7 +1278,7 @@ export const ProfileTab: React.FC<any> = ({
   return (
     <div className="p-8 space-y-12 flex flex-col items-center flex-1 pb-32">
       <header className="w-full relative text-center space-y-8 pt-6">
-        <button onClick={() => { setActiveSetting('profile'); setIsSettingsOpen(true); }} className="absolute top-0 right-0 p-4 text-slate-400">
+        <button onClick={() => setIsSettingsOpen(true)} className="absolute top-0 right-0 p-4 text-slate-400">
           <Settings size={24} />
         </button>
         <div className="w-40 h-40 rounded-full sculpted-glass p-1.5 shadow-2xl border border-white/40 overflow-hidden mx-auto">
@@ -1289,14 +1290,22 @@ export const ProfileTab: React.FC<any> = ({
         </div>
       </header>
 
+      {/* 核心功能：点击这里的色块，背景就会变 */}
       <section className="w-full sculpted-glass p-8 rounded-[32px] space-y-6">
-        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">主题色</h2>
+        <div className="flex items-center gap-3">
+          <Palette size={18} className="text-slate-500" />
+          <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">主题色选择</h2>
+        </div>
         <div className="flex flex-wrap gap-5 justify-between">
           {themeColors.map((color) => (
             <button
               key={color.value}
               onClick={() => onUpdateState?.({ themeColor: color.value })}
-              className={`w-10 h-10 rounded-full transition-all ${state.themeColor === color.value ? 'scale-125 shadow-lg border-4 border-white' : 'opacity-60'}`}
+              className={`w-10 h-10 rounded-full transition-all duration-300 ${
+                state.themeColor === color.value 
+                ? 'scale-125 shadow-lg border-4 border-white' 
+                : 'opacity-60 hover:opacity-100'
+              }`}
               style={{ backgroundColor: color.value }}
             />
           ))}
@@ -1304,7 +1313,7 @@ export const ProfileTab: React.FC<any> = ({
       </section>
 
       <ModalComponent isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="设置">
-        <div className="py-10 text-center text-slate-400">设置功能开发中</div>
+        <div className="py-10 text-center text-slate-400">设置功能开发中...</div>
       </ModalComponent>
     </div>
   );
