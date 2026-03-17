@@ -1,3 +1,4 @@
+const translations = TRANSLATIONS;
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 // 核心修复：删掉 ../ 直接从当前目录导入
