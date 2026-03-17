@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType } from './types';
 
-// 核心修复：直接从当前根目录导入，删掉 ./components/ 路径
+// 只改了路径，确保能找到文件
 import { 
   BottomNav, 
   HomeTab, 
@@ -37,13 +37,6 @@ export default function App() {
     window.addEventListener('setTab', handleSetTab);
     return () => window.removeEventListener('setTab', handleSetTab);
   }, []);
-
-  // Simulate storage alert
-  useEffect(() => {
-    if (state.storageUsage >= 88) {
-      console.log("Memoa：存储占用已达 88%，建议进行断舍离，删除一些重复的照片。");
-    }
-  }, [state.storageUsage]);
 
   const renderTab = () => {
     switch (state.activeTab) {
@@ -87,50 +80,30 @@ export default function App() {
     slate: ['bg-slate-700/20', 'bg-slate-900/10', 'bg-slate-800/10'],
     lavender: ['bg-violet-400/20', 'bg-purple-500/10', 'bg-indigo-400/10'],
     gold: ['bg-yellow-500/20', 'bg-amber-600/10', 'bg-orange-400/10'],
-    custom: state.customMoodColors || ['bg-pink-400/20', 'bg-yellow-200/10', 'bg-cyan-400/10'],
   };
 
   const currentBlobs = moodColors[mood] || moodColors.serene;
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-slate-50">
-      {/* Main Content Container - Mobile App Structure */}
-      <div 
-        className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col"
-      >
-        {/* Morning Mist Aurora Background */}
-        <div className="mist-aurora">
-          {currentBlobs.map((blob, i) => {
-            const isCustom = mood === 'custom';
-            const style = isCustom ? { backgroundColor: blob.replace('bg-[', '').replace(']/20', '') } : {};
-            const className = isCustom ? 
-              `aurora-blob transition-colors duration-1000` : 
-              `aurora-blob transition-colors duration-1000 ${blob}`;
-            
-            const sizes = [
-              "w-[800px] h-[800px] -top-64 -left-64",
-              "w-[1000px] h-[1000px] top-1/4 -right-64",
-              "w-[600px] h-[600px] bottom-0 left-1/4"
-            ];
-
-            return (
-              <div 
-                key={i} 
-                className={`${className} ${sizes[i]}`} 
-                style={style}
-              />
-            );
-          })}
+    <div className="relative min-h-screen w-full bg-slate-50">
+      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden shadow-2xl flex flex-col bg-white">
+        
+        {/* 背景层 */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {currentBlobs.map((blob, i) => (
+            <div key={i} className={`absolute rounded-full blur-3xl opacity-20 ${blob} ${
+              i === 0 ? "w-96 h-96 -top-20 -left-20" : i === 1 ? "w-80 h-80 top-1/2 -right-20" : "w-64 h-64 bottom-10 left-10"
+            }`} />
+          ))}
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div
             key={state.activeTab}
-            initial={{ opacity: 0, scale: 0.98, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.02, y: -10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-32"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-32 relative z-10"
           >
             {renderTab()}
           </motion.div>
@@ -138,9 +111,6 @@ export default function App() {
 
         <BottomNav activeTab={state.activeTab} setActiveTab={setActiveTab} language={state.language} />
       </div>
-    </div>
-  );
-}
     </div>
   );
 }
