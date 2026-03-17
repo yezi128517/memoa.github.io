@@ -1,42 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+
 /**
- * 核心修复：补全所有缺失的图标组件
- * 如果你代码里用了 <Home />，请确保这里导出了 Home
+ * 核心修复：一站式补全所有导航栏及界面图标
+ * 解决 Home, Sparkles, Heart 等未定义导致的白屏问题
  */
 import { 
+  // 底部导航栏常用
+  Home, 
+  House,         // 部分版本名为 House
   Search, 
-  Filter, 
-  User, 
-  Settings, 
   MessageSquare, 
-  Heart,      
-  Calendar, 
-  MapPin, 
-  MoreHorizontal, 
+  Heart, 
+  User,
+  
+  // 功能按钮及状态
   Plus,
+  Filter,
+  Settings,
+  MoreHorizontal,
   Send,
   Mic,
   Music,
   LogOut,
   ChevronRight,
+  
+  // 装饰与 AI 氛围
+  Sparkles,      // 解决 Sparkles is not defined
+  Zap,
+  Star,
+  
+  // 设置与个人中心
   Shield,
   Cloud,
   Bell,
   Lock,
-  Sparkles,
-  Zap,
-  Star,
-  Home,        // 必须加上这个，解决 Home is not defined
-  House,       // 备选，部分版本 Lucide 使用 House 替代 Home
-  Clock,       // 常用备份
-  History      // 常用备份
+  Calendar,
+  MapPin,
+  Clock,
+  History,
+  Info,
+  Share2
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
 import { AppState, Memory } from './types';
 import { CATEGORIES } from './constants';
 
+// 确保兼容小写引用
 const translations = TRANSLATIONS;
 
 // --- Shared Components ---
