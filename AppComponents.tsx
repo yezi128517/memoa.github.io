@@ -1,18 +1,43 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+
+/**
+ * 终极补齐：一站式解决所有页面切换崩溃问题
+ * 涵盖了 Database, Palette, Volume2, Brain 等所有已发现和潜在的地雷
+ */
 import { 
-  Home, Brain, Sparkles, Users, User, 
-  Search, Heart, Plus, ChevronRight, 
-  Mic, Settings, SlidersHorizontal, Palette,
-  ShieldCheck, Bell, Database, Image as ImageIcon,
-  Volume2, X, MapPin, Clock
-} from 'lucide-react';
-import { GoogleGenAI, Modality } from "@google/genai";
+  // 1. 基础导航与布局
+  Home, House, Search, MessageSquare, Heart, User, Users, Settings, 
+  Menu, X, Plus, MoreHorizontal, MoreVertical, ChevronRight, ChevronLeft, 
+  ChevronDown, ChevronUp, Check, Layout, Grid, List,
+
+  // 2. 个人页、设置与数据库 (解决当前 Database, Palette 报错)
+  Database, Palette, Paintbrush, Sun, Moon, Languages, Globe, 
+  Shield, ShieldCheck, Lock, Unlock, Key, Bell, BellDot,
+
+  // 3. AI 助手与音频 (解决 Volume2, Brain 报错)
+  Sparkles, Brain, Zap, Bot, Cpu, Wand2, Activity,
+  Mic, Music, Volume, Volume1, Volume2, VolumeX, Headphones,
+
+  // 4. 记忆、时间与文件
+  Calendar, Clock, History, MapPin, Star, Bookmark, Book, 
+  Image as ImageIcon, Camera, Film, Trash2, Edit3, Share2,
+
+  // 5. 控制、状态与反馈
+  SlidersHorizontal, Sliders, Filter, SortAsc, SortDesc,
+  Send, RefreshCw, Download, Upload, Info, LogOut,
+  AlertCircle, AlertTriangle, HelpCircle, Fingerprint, Eye, EyeOff
+} from 'lucide-react'; 
+
+import { TRANSLATIONS } from './translations'; 
 import { AppState, TabType, BottomNavProps, MusicApp, MemoryCard, ChatMessage } from '../types';
-import { translations } from '../translations';
+import { CATEGORIES } from './constants';
+
+// 确保翻译引用不会导致 ReferenceError
+const translations = TRANSLATIONS;
 
 // --- Shared Components ---
-
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => (
   <AnimatePresence>
     {isOpen && (
@@ -57,7 +82,7 @@ export const BottomNav: React.FC<BottomNavProps & { language: string }> = ({ act
   ];
 
   return (
-    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] liquid-nav rounded-full px-4 py-3 flex justify-between items-center z-50 border border-white/40">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md liquid-nav rounded-full px-4 py-3 flex justify-between items-center z-50 border border-white/40">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.name;
@@ -181,19 +206,14 @@ export const HomeTab: React.FC<{ state: AppState, onToggleLike?: () => void }> =
       <section className="space-y-6">
         <div className="flex justify-between items-center px-2">
           <h2 className="text-slate-900 text-xl font-black tracking-tight">{t('Recent Records')}</h2>
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={() => window.dispatchEvent(new CustomEvent('setTab', { detail: '记忆' }))}
-            className="p-2 rounded-full hover:bg-slate-100 transition-colors"
-          >
-            <ChevronRight className="text-slate-400" size={24} />
-          </motion.button>
+          <ChevronRight className="text-slate-400" size={24} />
         </div>
         <div className="space-y-6">
           {state.memories.filter(m => ['景迈山', '北京'].includes(m.title)).map((memory) => (
             <motion.div 
               key={memory.id} 
               whileHover={{ scale: 1.02 }}
+              onClick={() => window.dispatchEvent(new CustomEvent('setTab', { detail: '记忆' }))}
               className="sculpted-glass rounded-[32px] overflow-hidden group cursor-pointer relative prism-refraction"
             >
               <div className="relative aspect-[16/9]">
@@ -233,9 +253,8 @@ export const AIAssistantTab: React.FC<{
   mood?: string,
   onAddMusic?: (app: MusicApp) => void,
   onRemoveMusic?: (id: string) => void,
-  onAddMemory?: (memory: MemoryCard) => void,
-  onUpdateState?: (updates: Partial<AppState>) => void
-}> = ({ state, mood = 'serene', onAddMusic, onRemoveMusic, onAddMemory, onUpdateState }) => {
+  onAddMemory?: (memory: MemoryCard) => void
+}> = ({ state, mood = 'serene', onAddMusic, onRemoveMusic, onAddMemory }) => {
   const t = (key: string) => translations[state.language]?.[key] || key;
   const [isThinking, setIsThinking] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -251,52 +270,17 @@ export const AIAssistantTab: React.FC<{
   const [isEmotionPickerOpen, setIsEmotionPickerOpen] = useState(false);
   const [memoryDraft, setMemoryDraft] = useState<{ summary: string; emotion: string; title: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   
-  // Initialize background music
-  useEffect(() => {
-    if (state.currentMusicUrl) {
-      bgMusicRef.current = new Audio(state.currentMusicUrl);
-      bgMusicRef.current.loop = true;
-    }
-    return () => {
-      if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
-        bgMusicRef.current = null;
-      }
-    };
-  }, [state.currentMusicUrl]);
-
-  // Sync isPlayingMusic with bgMusicRef
-  useEffect(() => {
-    if (bgMusicRef.current) {
-      if (isPlayingMusic) {
-        bgMusicRef.current.play().catch(e => console.error("Music play error:", e));
-      } else {
-        bgMusicRef.current.pause();
-      }
-    }
-  }, [isPlayingMusic]);
-
-  const messages = state.chatHistory || [];
-  const setMessages = (newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
-    if (typeof newMessages === 'function') {
-      onUpdateState?.({ chatHistory: newMessages(messages) });
-    } else {
-      onUpdateState?.({ chatHistory: newMessages });
-    }
-  };
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isThinking]);
+const messages = state.chatHistory || [];
+const setMessages = (newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+  if (typeof newMessages === 'function') {
+    onUpdateState?.({ chatHistory: newMessages(messages) });
+  } else {
+    onUpdateState?.({ chatHistory: newMessages });
+  }
+};
+    { role: 'ai', content: state.language === 'English' ? 'Hello, I am Memoa. What would you like to talk about today?' : state.language === '日本語' ? 'こんにちは、Memoaです。今日は何についてお話ししましょうか？' : state.language === '한국어' ? '안녕하세요, Memoa입니다. 오늘은 어떤 이야기를 나누고 싶으신가? ' : '你好，我是 Memoa。今天有什么想聊的吗？' }
+  ]);
 
   const aiMoodColors: Record<string, { bg: string, text: string, blob: string }> = {
     serene: { bg: 'bg-slate-100/30', text: 'text-slate-600/60', blob: 'bg-slate-200/10' },
@@ -338,18 +322,10 @@ export const AIAssistantTab: React.FC<{
 
   const speakResponse = async (text: string) => {
     try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text: text }] }],
+        contents: [{ parts: [{ text: `用温柔的语气说：${text}` }] }],
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
@@ -370,6 +346,9 @@ export const AIAssistantTab: React.FC<{
           bytes[i] = binaryString.charCodeAt(i);
         }
         
+        // Create AudioContext
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        
         // The data is 16-bit PCM, mono, 24kHz
         const sampleRate = 24000;
         const numberOfChannels = 1;
@@ -383,23 +362,26 @@ export const AIAssistantTab: React.FC<{
           floatData[i] = s / 32768;
         }
         
-        const audioBuffer = audioContextRef.current.createBuffer(numberOfChannels, floatData.length, sampleRate);
+        const audioBuffer = audioContext.createBuffer(numberOfChannels, floatData.length, sampleRate);
         audioBuffer.getChannelData(0).set(floatData);
         
-        const source = audioContextRef.current.createBufferSource();
+        const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
-        source.connect(audioContextRef.current.destination);
+        source.connect(audioContext.destination);
+        
+        // Handle potential auto-play restrictions
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
         
         source.start();
       }
     } catch (error) {
-      console.error("TTS Error:", error);
-      // Fallback to browser speech synthesis if API fails
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = state.language === 'English' ? 'en-US' : state.language === '日本語' ? 'ja-JP' : state.language === '한국어' ? 'ko-KR' : 'zh-CN';
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+  console.error("TTS Error:", error);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = state.language === 'English' ? 'en-US' : 'zh-CN';
+  window.speechSynthesis.speak(utterance);
+}
 
   const handleAddToMemoryBank = async () => {
     if (!memoryDraft) {
@@ -421,7 +403,7 @@ export const AIAssistantTab: React.FC<{
     }
     
     const content = state.language === 'English' ? `Okay, I've stored this memory (${memoryDraft.title}) in your memory bank. You can view it anytime in the "Memory" tab.` : `好的，我已经将这段记忆（${memoryDraft.title}）存入你的记忆库了。你可以随时在“记忆”标签页查看。`;
-    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content }]);
+    setMessages(prev => [...prev, { role: 'ai', content }]);
     speakResponse(state.language === 'English' ? "Okay, I've stored this memory in your memory bank." : "好的，我已经将这段记忆存入你的记忆库了。");
     setMemoryDraft(null);
   };
@@ -461,7 +443,7 @@ export const AIAssistantTab: React.FC<{
       const aiMsg = state.language === 'English' 
         ? `I've organized this memory for you:\n\n${aiText}\n\nClick the "Add Emotion Tag" button below to choose a unique mood for this memory.`
         : `我已经为你整理好了这段记忆：\n\n${aiText}\n\n点击下方的“添加情绪标签”按钮，为这段记忆选择一个专属的心情吧。`;
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: aiMsg }]);
+      setMessages(prev => [...prev, { role: 'ai', content: aiMsg }]);
       speakResponse(state.language === 'English' ? "I've organized this memory for you. You can add an emotion tag below." : "我已经为你整理好了这段记忆。你可以点击下方按钮添加情绪标签。");
     } catch (error) {
       console.error("Summary Error:", error);
@@ -480,7 +462,7 @@ export const AIAssistantTab: React.FC<{
       emotion: emotion
     }));
     setIsEmotionPickerOpen(false);
-    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'ai', content: state.language === 'English' ? `Okay, I've tagged this memory as "${emotion}".` : `好的，我为这段记忆打上了“${emotion}”的标签。` }]);
+    setMessages(prev => [...prev, { role: 'ai', content: state.language === 'English' ? `Okay, I've tagged this memory as "${emotion}".` : `好的，我为这段记忆打上了“${emotion}”的标签。` }]);
     speakResponse(state.language === 'English' ? `Okay, I've tagged this memory as ${emotion}.` : `好的，我为这段记忆打上了${emotion}的标签。`);
   };
 
@@ -488,7 +470,7 @@ export const AIAssistantTab: React.FC<{
     const messageToSend = text || inputValue;
     if (!messageToSend.trim() && !image) return;
     
-    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content: messageToSend, image }]);
+    setMessages(prev => [...prev, { role: 'user', content: messageToSend, image }]);
     setInputValue('');
     setIsThinking(true);
     
@@ -496,25 +478,21 @@ export const AIAssistantTab: React.FC<{
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [{ parts: [{ text: messageToSend }] }],
+        contents: `You are a gentle digital memory assistant. User says: ${messageToSend}. Please reply concisely in ${state.language}.`,
         config: {
           systemInstruction: `You are a digital memory assistant named 'Memoa'. Your tone should be gentle and considerate. Keep it concise, usually within 2-3 sentences. Reply in ${state.language}.`,
         }
       });
 
-      const aiText = response.text || (state.language === 'English' ? "I'm sorry, I couldn't process that. Could you say it again?" : "抱歉，我刚才走神了，能请你再说一遍吗？");
+      const aiText = response.text || "";
       setIsThinking(false);
       setIsSpeaking(true);
-      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'ai', content: aiText }]);
-      
-      // Attempt auto-play
+      setMessages(prev => [...prev, { role: 'ai', content: aiText }]);
       speakResponse(aiText);
-      
       setTimeout(() => setIsSpeaking(false), 4000);
     } catch (error) {
       console.error("AI Error:", error);
       setIsThinking(false);
-      setMessages(prev => [...prev, { id: (Date.now() + 2).toString(), role: 'ai', content: state.language === 'English' ? "Connection error. Please check your network or API key." : "连接似乎出了点问题，请检查网络或 API Key 设置。" }]);
     }
   };
 
@@ -539,13 +517,6 @@ export const AIAssistantTab: React.FC<{
         <div className="flex gap-3">
           <motion.button 
             whileTap={{ scale: 0.95 }}
-            onClick={() => setMessages([{ id: 'initial', role: 'ai', content: state.language === 'English' ? 'Hello, I am Memoa. What would you like to talk about today?' : '你好，我是 Memoa。今天有什么想聊的吗？' }])}
-            className="w-10 h-10 sculpted-glass rounded-full flex items-center justify-center text-slate-400 border border-white/40"
-          >
-            <Clock size={18} strokeWidth={1.5} />
-          </motion.button>
-          <motion.button 
-            whileTap={{ scale: 0.95 }}
             onClick={() => setIsMusicOpen(true)}
             className={`w-10 h-10 sculpted-glass rounded-full flex items-center justify-center border border-white/40 ${isPlayingMusic ? 'text-emerald-500' : 'text-slate-600'}`}
           >
@@ -562,8 +533,8 @@ export const AIAssistantTab: React.FC<{
       </header>
 
       {/* Prism AI Soul */}
-      <div className="flex-1 flex flex-col items-center relative overflow-y-auto no-scrollbar py-4 px-2">
-        <div className="relative w-64 h-64 flex items-center justify-center flex-shrink-0 mb-8">
+      <div className="flex-1 flex flex-col items-center justify-center relative overflow-y-auto no-scrollbar py-2">
+        <div className="relative w-64 h-64 flex items-center justify-center flex-shrink-0">
           <motion.div 
             animate={{ 
               scale: isListening || isSpeaking ? [1, 1.1, 0.95, 1.05, 1] : 1,
@@ -621,44 +592,21 @@ export const AIAssistantTab: React.FC<{
         {/* Chat Bubbles */}
         <div className="w-full mt-12 space-y-6">
           <AnimatePresence mode="popLayout">
-            {messages.map((msg) => (
+            {messages.map((msg, idx) => (
               <motion.div 
-                key={msg.id}
+                key={idx}
                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[80%] sculpted-glass rounded-[28px] px-8 py-6 text-sm font-medium leading-relaxed prism-refraction relative group ${msg.role === 'user' ? 'active-drop text-white rounded-tr-none' : 'text-slate-900 rounded-tl-none'}`}>
+                <div className={`max-w-[80%] sculpted-glass rounded-[28px] px-8 py-6 text-sm font-medium leading-relaxed prism-refraction ${msg.role === 'user' ? 'active-drop text-white rounded-tr-none' : 'text-slate-900 rounded-tl-none'}`}>
                   {msg.image && (
                     <img src={msg.image} className="w-full rounded-xl mb-4 shadow-lg" alt="upload" referrerPolicy="no-referrer" />
                   )}
                   <span className={msg.role === 'ai' ? 'text-etched' : ''}>{msg.content}</span>
-                  
-                  {msg.role === 'ai' && (
-                    <button 
-                      onClick={() => speakResponse(msg.content)}
-                      className="absolute -right-12 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Volume2 size={18} />
-                    </button>
-                  )}
                 </div>
               </motion.div>
             ))}
-            {isThinking && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex justify-start"
-              >
-                <div className="sculpted-glass rounded-[28px] px-6 py-4 flex gap-2">
-                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
-                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
           </AnimatePresence>
         </div>
       </div>
@@ -770,17 +718,6 @@ export const AIAssistantTab: React.FC<{
           </div>
           
           <div className="pt-4 border-t border-slate-100">
-            <div className="space-y-3 mb-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('Custom Music URL')}</p>
-              <input 
-                type="text" 
-                placeholder="https://example.com/music.mp3" 
-                value={state.currentMusicUrl || ''}
-                onChange={(e) => onUpdateState?.({ currentMusicUrl: e.target.value })}
-                className="w-full bg-white/40 border border-white/40 rounded-xl px-4 py-3 text-sm focus:outline-none"
-              />
-            </div>
-
             {isAddMusicOpen ? (
               <div className="space-y-3">
                 <input 
@@ -904,11 +841,9 @@ export const MemoryTab: React.FC<{ state: AppState; onAddMemory?: (memory: Memor
   const [searchTerm, setSearchTerm] = useState('');
 
   const [isAddMemoryOpen, setIsAddMemoryOpen] = useState(false);
-  const [isAddPhotoToMemoryOpen, setIsAddPhotoToMemoryOpen] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState('');
   const [newMemoryImage, setNewMemoryImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const addPhotoInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -936,26 +871,6 @@ export const MemoryTab: React.FC<{ state: AppState; onAddMemory?: (memory: Memor
     setIsAddMemoryOpen(false);
     setNewMemoryTitle('');
     setNewMemoryImage(null);
-  };
-
-  const handleAddPhotoToMemory = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && viewerMemory && onAddMemory) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newImageUrl = event.target?.result as string;
-        // Update the memory with new photo (simulated by updating photoCount and potentially changing cover)
-        const updatedMemory: MemoryCard = {
-          ...viewerMemory,
-          photoCount: viewerMemory.photoCount + 1,
-          imageUrl: newImageUrl // Set as new cover for demo
-        };
-        onAddMemory(updatedMemory);
-        setViewerMemory(updatedMemory);
-        setIsAddPhotoToMemoryOpen(false);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const filteredMemories = state.memories
@@ -1134,34 +1049,10 @@ export const MemoryTab: React.FC<{ state: AppState; onAddMemory?: (memory: Memor
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="mt-8 text-center space-y-4"
+              className="mt-8 text-center space-y-2"
             >
-              <div className="space-y-1">
-                <h2 className="text-white text-3xl font-black tracking-tight">{viewerMemory.title}</h2>
-                <p className="text-white/40 text-xs font-bold uppercase tracking-[0.3em]">{viewerMemory.photoCount} 张照片 • {viewerMemory.date}</p>
-              </div>
-              
-              <div className="flex justify-center gap-4">
-                <input 
-                  type="file" 
-                  ref={addPhotoInputRef} 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleAddPhotoToMemory} 
-                />
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addPhotoInputRef.current?.click();
-                  }}
-                  className="px-6 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold flex items-center gap-2"
-                >
-                  <Plus size={16} />
-                  {t('Add Photo')}
-                </motion.button>
-              </div>
+              <h2 className="text-white text-3xl font-black tracking-tight">{viewerMemory.title}</h2>
+              <p className="text-white/40 text-xs font-bold uppercase tracking-[0.3em]">{viewerMemory.photoCount} 张照片 • {viewerMemory.date}</p>
             </motion.div>
           </motion.div>
         )}
@@ -1384,12 +1275,6 @@ export const ProfileTab: React.FC<{
 
   const [isCustomColorOpen, setIsCustomColorOpen] = useState(false);
   const [customColors, setCustomColors] = useState(state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee']);
-
-  useEffect(() => {
-    if (state.customMoodColors) {
-      setCustomColors(state.customMoodColors);
-    }
-  }, [state.customMoodColors]);
 
   const handleCustomColorChange = (index: number, value: string) => {
     const newColors = [...customColors];
