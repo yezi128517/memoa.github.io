@@ -86,5 +86,12 @@ export const INITIAL_STATE: AppState = {
     { id: '3', name: '网易云音乐', type: 'custom' },
     { id: '4', name: 'QQ音乐', type: 'custom' }
   ],
-  language: '简体中文'
+  language: '简体中文',
+  mood: 'serene',
+  customMoodColors: ['#f472b6', '#fef08a', '#22d3ee'],
+  currentMusicUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  chatHistory: [
+    { id: 'initial', role: 'ai', content: '你好，我是 Memoa。今天有什么想聊的吗？' }
+  ],
+  isPlayingMusic: false
 };
