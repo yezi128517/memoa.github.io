@@ -31,7 +31,7 @@ import {
 } from 'lucide-react'; 
 
 import { TRANSLATIONS } from './translations'; 
-import { AppState, Memory } from './types';
+import { AppState, TabType, BottomNavProps, MusicApp, MemoryCard, ChatMessage } from '../types';
 import { CATEGORIES } from './constants';
 
 // 确保翻译引用不会导致 ReferenceError
@@ -213,6 +213,7 @@ export const HomeTab: React.FC<{ state: AppState, onToggleLike?: () => void }> =
             <motion.div 
               key={memory.id} 
               whileHover={{ scale: 1.02 }}
+              onClick={() => window.dispatchEvent(new CustomEvent('setTab', { detail: '记忆' }))}
               className="sculpted-glass rounded-[32px] overflow-hidden group cursor-pointer relative prism-refraction"
             >
               <div className="relative aspect-[16/9]">
@@ -270,7 +271,14 @@ export const AIAssistantTab: React.FC<{
   const [memoryDraft, setMemoryDraft] = useState<{ summary: string; emotion: string; title: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [messages, setMessages] = useState<{ role: 'user' | 'ai'; content: string; image?: string }[]>([
+const messages = state.chatHistory || [];
+const setMessages = (newMessages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+  if (typeof newMessages === 'function') {
+    onUpdateState?.({ chatHistory: newMessages(messages) });
+  } else {
+    onUpdateState?.({ chatHistory: newMessages });
+  }
+};
     { role: 'ai', content: state.language === 'English' ? 'Hello, I am Memoa. What would you like to talk about today?' : state.language === '日本語' ? 'こんにちは、Memoaです。今日は何についてお話ししましょうか？' : state.language === '한국어' ? '안녕하세요, Memoa입니다. 오늘은 어떤 이야기를 나누고 싶으신가? ' : '你好，我是 Memoa。今天有什么想聊的吗？' }
   ]);
 
@@ -369,9 +377,11 @@ export const AIAssistantTab: React.FC<{
         source.start();
       }
     } catch (error) {
-      console.error("TTS Error:", error);
-    }
-  };
+  console.error("TTS Error:", error);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = state.language === 'English' ? 'en-US' : 'zh-CN';
+  window.speechSynthesis.speak(utterance);
+}
 
   const handleAddToMemoryBank = async () => {
     if (!memoryDraft) {
