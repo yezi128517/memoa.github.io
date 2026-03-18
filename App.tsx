@@ -1,9 +1,4 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { INITIAL_STATE } from './constants';
 import { AppState, TabType } from './types';
@@ -14,43 +9,14 @@ import {
   AIAssistantTab, 
   RelationshipsTab, 
   ProfileTab 
-} from './components/AppComponents';
+} from './AppComponents';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
-  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize background music
-  useEffect(() => {
-    if (state.currentMusicUrl) {
-      bgMusicRef.current = new Audio(state.currentMusicUrl);
-      bgMusicRef.current.loop = true;
-    }
-    return () => {
-      if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
-        bgMusicRef.current = null;
-      }
-    };
-  }, [state.currentMusicUrl]);
-
-  // Sync isPlayingMusic with bgMusicRef
-  useEffect(() => {
-    if (bgMusicRef.current) {
-      if (state.isPlayingMusic) {
-        bgMusicRef.current.play().catch(e => console.error("Music play error:", e));
-      } else {
-        bgMusicRef.current.pause();
-      }
-    }
-  }, [state.isPlayingMusic]);
+  const [mood, setMood] = useState<string>('serene');
 
   const setActiveTab = (tab: TabType) => {
     setState(prev => ({ ...prev, activeTab: tab }));
-  };
-
-  const setMood = (mood: string) => {
-    setState(prev => ({ ...prev, mood }));
   };
 
   const toggleFeaturedLike = () => {
@@ -65,50 +31,36 @@ export default function App() {
     return () => window.removeEventListener('setTab', handleSetTab);
   }, []);
 
-  // Simulate storage alert
-  useEffect(() => {
-    if (state.storageUsage >= 88) {
-      console.log("Memoa：存储占用已达 88%，建议进行断舍离，删除一些重复的照片。");
-    }
-  }, [state.storageUsage]);
-
   const renderTab = () => {
     switch (state.activeTab) {
-      case '主页': return <HomeTab state={state} onToggleLike={toggleFeaturedLike} setActiveTab={setActiveTab} />;
+     case '主页': return <HomeTab state={state} onToggleLike={toggleFeaturedLike} setActiveTab={setActiveTab} />;
       case '记忆': return (
         <MemoryTab 
           state={state} 
-          onAddMemory={(m) => setState(prev => {
-            const exists = prev.memories.find(mem => mem.id === m.id);
-            if (exists) {
-              return { ...prev, memories: prev.memories.map(mem => mem.id === m.id ? m : mem) };
-            }
-            return { ...prev, memories: [m, ...prev.memories] };
-          })} 
+        onAddMemory={(m) => setState(prev => {
+  const exists = prev.memories.find(mem => mem.id === m.id);
+  if (exists) {
+    return { ...prev, memories: prev.memories.map(mem => mem.id === m.id ? m : mem) };
+  }
+  return { ...prev, memories: [m, ...prev.memories] };
+})}
           onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
         />
       );
       case 'AI助手': return (
         <AIAssistantTab 
           state={state} 
-          mood={state.mood} 
+          mood={mood} 
           onAddMusic={(app) => setState(prev => ({ ...prev, musicApps: [...prev.musicApps, app] }))}
           onRemoveMusic={(id) => setState(prev => ({ ...prev, musicApps: prev.musicApps.filter(a => a.id !== id) }))}
-          onAddMemory={(m) => setState(prev => {
-            const exists = prev.memories.find(mem => mem.id === m.id);
-            if (exists) {
-              return { ...prev, memories: prev.memories.map(mem => mem.id === m.id ? m : mem) };
-            }
-            return { ...prev, memories: [m, ...prev.memories] };
-          })} 
-          onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
+          onAddMemory={(m) => setState(prev => ({ ...prev, memories: [m, ...prev.memories] }))}
         />
       );
       case '关系': return <RelationshipsTab state={state} />;
       case '个人': return (
         <ProfileTab 
           state={state} 
-          mood={state.mood} 
+          mood={mood} 
           onMoodChange={(m: any) => setMood(m)} 
           onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
         />
@@ -120,7 +72,7 @@ export default function App() {
   const moodColors: Record<string, string[]> = {
     serene: ['bg-slate-400/20', 'bg-slate-500/10', 'bg-slate-300/10'],
     energetic: ['bg-yellow-400/20', 'bg-lime-400/10', 'bg-amber-400/10'],
-    warm: ['bg-orange-50/20', 'bg-red-500/10', 'bg-rose-400/10'],
+    warm: ['bg-orange-500/20', 'bg-red-500/10', 'bg-rose-400/10'],
     mystic: ['bg-emerald-600/20', 'bg-green-500/10', 'bg-lime-600/10'],
     teal: ['bg-cyan-400/20', 'bg-teal-400/10', 'bg-blue-400/10'],
     royal: ['bg-indigo-400/20', 'bg-blue-500/10', 'bg-purple-400/10'],
@@ -131,19 +83,14 @@ export default function App() {
     custom: state.customMoodColors || ['#f472b6', '#fef08a', '#22d3ee'],
   };
 
-  const currentBlobs = moodColors[state.mood] || moodColors.serene;
+  const currentBlobs = moodColors[mood] || moodColors.serene;
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-slate-50">
-      {/* Main Content Container - Mobile App Structure */}
-      <div 
-        className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col"
-      >
-        {/* Morning Mist Aurora Background - Now contained within the mobile app */}
+      <div className="w-full min-h-screen relative sm:max-w-[420px] sm:mx-auto sm:my-8 sm:rounded-[64px] sm:overflow-hidden sculpted-glass prism-refraction shadow-2xl flex flex-col">
         <div className="mist-aurora">
           {currentBlobs.map((blob, i) => {
-            const isCustom = state.mood === 'custom';
-            // If custom, blob is a hex code. If standard, blob is a tailwind class.
+            const isCustom = mood === 'custom';
             const style = isCustom ? { backgroundColor: blob, opacity: i === 0 ? 0.4 : 0.2 } : {};
             const className = isCustom ? 
               `aurora-blob transition-all duration-1000` : 
@@ -156,11 +103,7 @@ export default function App() {
             ];
 
             return (
-              <div 
-                key={i} 
-                className={`${className} ${sizes[i]}`} 
-                style={style}
-              />
+              <div key={i} className={`${className} ${sizes[i]}`} style={style} />
             );
           })}
         </div>
