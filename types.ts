@@ -26,6 +26,13 @@ export interface MusicApp {
   type: 'spotify' | 'apple' | 'custom';
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'ai';
+  content: string;
+  image?: string;
+}
+
 export interface AppState {
   activeTab: TabType;
   storageUsage: number;
