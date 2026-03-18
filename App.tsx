@@ -33,11 +33,18 @@ export default function App() {
 
   const renderTab = () => {
     switch (state.activeTab) {
-      case '主页': return <HomeTab state={state} onToggleLike={toggleFeaturedLike} />;
+     case '主页': return <HomeTab state={state} onToggleLike={toggleFeaturedLike} setActiveTab={setActiveTab} />;
       case '记忆': return (
         <MemoryTab 
           state={state} 
-          onAddMemory={(m) => setState(prev => ({ ...prev, memories: [m, ...prev.memories] }))} 
+        onAddMemory={(m) => setState(prev => {
+  const exists = prev.memories.find(mem => mem.id === m.id);
+  if (exists) {
+    return { ...prev, memories: prev.memories.map(mem => mem.id === m.id ? m : mem) };
+  }
+  return { ...prev, memories: [m, ...prev.memories] };
+})}
+          onUpdateState={(updates) => setState(prev => ({ ...prev, ...updates }))}
         />
       );
       case 'AI助手': return (
